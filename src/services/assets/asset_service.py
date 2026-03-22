@@ -1,6 +1,8 @@
 """Asset service implementation using Google Ads SDK."""
 
 import base64
+import mimetypes
+from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 import aiohttp
@@ -122,11 +124,12 @@ class AssetService:
         name: str,
         image_data_base64: Optional[str] = None,
         image_url: Optional[str] = None,
+        image_file_path: Optional[str] = None,
         mime_type: str = "image/jpeg",
     ) -> Dict[str, Any]:
-        """Create an image asset from base64-encoded data or a URL.
+        """Create an image asset from base64, a URL, or a local file.
 
-        Provide exactly one of ``image_data_base64`` or ``image_url``.
+        Provide exactly one of the three source parameters.
 
         Args:
             ctx: FastMCP context
@@ -134,7 +137,8 @@ class AssetService:
             name: Name for the asset
             image_data_base64: Base64-encoded image bytes
             image_url: Public URL to download the image from
-            mime_type: MIME type (image/jpeg, image/png, image/gif)
+            image_file_path: Absolute path to a local image file
+            mime_type: MIME type (auto-detected from URL or file extension)
 
         Returns:
             Created asset details
@@ -142,7 +146,13 @@ class AssetService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            if image_url:
+            if image_file_path:
+                p = Path(image_file_path)
+                raw_bytes = p.read_bytes()
+                guessed = mimetypes.guess_type(str(p))[0]
+                if guessed:
+                    mime_type = guessed
+            elif image_url:
                 async with aiohttp.ClientSession() as session:
                     async with session.get(image_url) as resp:
                         resp.raise_for_status()
@@ -155,7 +165,9 @@ class AssetService:
             elif image_data_base64:
                 raw_bytes = base64.b64decode(image_data_base64)
             else:
-                raise ValueError("Provide either image_data_base64 or image_url")
+                raise ValueError(
+                    "Provide one of: image_file_path, image_url, or image_data_base64"
+                )
 
             asset = Asset()
             asset.type_ = AssetTypeEnum.AssetType.IMAGE
@@ -590,18 +602,20 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         name: str,
         image_data_base64: Optional[str] = None,
         image_url: Optional[str] = None,
+        image_file_path: Optional[str] = None,
         mime_type: str = "image/jpeg",
     ) -> Dict[str, Any]:
-        """Create an image asset from a base64 string or a public URL.
+        """Create an image asset from a local file, URL, or base64 string.
 
-        Provide exactly one of image_data_base64 or image_url.
+        Provide exactly one of the three source parameters.
 
         Args:
             customer_id: The customer ID
             name: Name for the asset (e.g. "Hero Banner 1200x628")
             image_data_base64: Base64-encoded image data
-            image_url: Public URL to download the image from (easier for most use cases)
-            mime_type: MIME type - image/jpeg, image/png, or image/gif (auto-detected when using image_url)
+            image_url: Public URL to download the image from
+            image_file_path: Absolute local file path (e.g. "C:/images/logo.png")
+            mime_type: MIME type - auto-detected from file extension or URL
 
         Returns:
             Created asset details including resource_name and asset_id
@@ -612,6 +626,7 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
             name=name,
             image_data_base64=image_data_base64,
             image_url=image_url,
+            image_file_path=image_file_path,
             mime_type=mime_type,
         )
 

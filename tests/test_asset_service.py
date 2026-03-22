@@ -198,7 +198,9 @@ async def test_create_image_asset_requires_source(
     mock_ctx: Context,
 ) -> None:
     """Test that create_image_asset fails without base64 or URL."""
-    with pytest.raises(Exception, match="image_data_base64 or image_url"):
+    with pytest.raises(
+        Exception, match="image_file_path, image_url, or image_data_base64"
+    ):
         await asset_service.create_image_asset(
             ctx=mock_ctx,
             customer_id="1234567890",
