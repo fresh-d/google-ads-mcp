@@ -1,6 +1,6 @@
 """Tests for CampaignDraftService."""
 
-from typing import Any
+from typing import Any, override
 from unittest.mock import Mock, patch
 
 import pytest
@@ -279,7 +279,8 @@ async def test_promote_campaign_draft(
 
     # Create mock long running operation
     class MockOperation:
-        def __str__(self):
+        @override
+        def __str__(self) -> str:
             return "operations/promote_12345"
 
     mock_operation = MockOperation()
@@ -326,11 +327,13 @@ async def test_list_campaign_draft_async_errors(
 
     # Create mock error pages
     class MockErrorPage1:
-        def __str__(self):
+        @override
+        def __str__(self) -> str:
             return "Error 1: Invalid bid strategy"
 
     class MockErrorPage2:
-        def __str__(self):
+        @override
+        def __str__(self) -> str:
             return "Error 2: Budget constraint violation"
 
     mock_error_page1 = MockErrorPage1()

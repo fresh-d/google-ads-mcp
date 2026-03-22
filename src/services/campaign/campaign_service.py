@@ -12,6 +12,9 @@ from google.ads.googleads.v20.enums.types.campaign_experiment_type import (
     CampaignExperimentTypeEnum,
 )
 from google.ads.googleads.v20.enums.types.campaign_status import CampaignStatusEnum
+from google.ads.googleads.v20.enums.types.eu_political_advertising_status import (
+    EuPoliticalAdvertisingStatusEnum,
+)
 from google.ads.googleads.v20.resources.types.campaign import Campaign
 from google.ads.googleads.v20.services.services.campaign_service import (
     CampaignServiceClient,
@@ -89,6 +92,9 @@ class CampaignService:
 
             # Set status
             campaign.status = status
+
+            # Required EU political ads declaration (API rejects create without this)
+            campaign.contains_eu_political_advertising = EuPoliticalAdvertisingStatusEnum.EuPoliticalAdvertisingStatus.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
 
             # Set campaign experiment type
             campaign.experiment_type = (

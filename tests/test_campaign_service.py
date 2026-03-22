@@ -12,6 +12,9 @@ from google.ads.googleads.v20.enums.types.campaign_experiment_type import (
     CampaignExperimentTypeEnum,
 )
 from google.ads.googleads.v20.enums.types.campaign_status import CampaignStatusEnum
+from google.ads.googleads.v20.enums.types.eu_political_advertising_status import (
+    EuPoliticalAdvertisingStatusEnum,
+)
 from google.ads.googleads.v20.services.services.campaign_service import (
     CampaignServiceClient,
 )
@@ -104,6 +107,10 @@ async def test_create_campaign(
         operation.create.experiment_type
         == CampaignExperimentTypeEnum.CampaignExperimentType.BASE
     )
+    assert (
+        operation.create.contains_eu_political_advertising
+        == EuPoliticalAdvertisingStatusEnum.EuPoliticalAdvertisingStatus.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
+    )
 
 
 @pytest.mark.asyncio
@@ -162,6 +169,10 @@ async def test_create_campaign_with_dates(
     operation = request.operations[0]
     assert operation.create.start_date == "20240301"
     assert operation.create.end_date == "20240331"
+    assert (
+        operation.create.contains_eu_political_advertising
+        == EuPoliticalAdvertisingStatusEnum.EuPoliticalAdvertisingStatus.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
+    )
 
 
 @pytest.mark.asyncio
@@ -219,6 +230,10 @@ async def test_create_campaign_shopping_channel(
     assert (
         operation.create.advertising_channel_type
         == AdvertisingChannelTypeEnum.AdvertisingChannelType.SHOPPING
+    )
+    assert (
+        operation.create.contains_eu_political_advertising
+        == EuPoliticalAdvertisingStatusEnum.EuPoliticalAdvertisingStatus.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
     )
 
 
@@ -522,6 +537,10 @@ async def test_tool_wrapper_create_campaign(
         == AdvertisingChannelTypeEnum.AdvertisingChannelType.SEARCH
     )
     assert operation.create.status == CampaignStatusEnum.CampaignStatus.PAUSED
+    assert (
+        operation.create.contains_eu_political_advertising
+        == EuPoliticalAdvertisingStatusEnum.EuPoliticalAdvertisingStatus.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
+    )
 
 
 @pytest.mark.asyncio
