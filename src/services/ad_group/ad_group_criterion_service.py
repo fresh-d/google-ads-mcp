@@ -305,6 +305,13 @@ class AdGroupCriterionService:
                 self.client.mutate_ad_group_criteria(request=request)
             )
 
+            await ctx.log(
+                level="info",
+                message=(
+                    f"Added {len(operations)} demographic criteria to ad group "
+                    f"{ad_group_id}"
+                ),
+            )
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:

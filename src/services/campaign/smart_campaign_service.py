@@ -4,11 +4,15 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types.criteria import LocationInfo
+from google.ads.googleads.v20.common.types.criteria import (
+    KeywordThemeInfo,
+    LocationInfo,
+)
 from google.ads.googleads.v20.services.services.smart_campaign_suggest_service import (
     SmartCampaignSuggestServiceClient,
 )
 from google.ads.googleads.v20.services.types.smart_campaign_suggest_service import (
+    SmartCampaignSuggestionInfo,
     SuggestKeywordThemesRequest,
     SuggestKeywordThemesResponse,
     SuggestSmartCampaignAdRequest,
@@ -164,15 +168,20 @@ class SmartCampaignService:
             request = SuggestKeywordThemesRequest()
             request.customer_id = customer_id
 
-            # Set business info
             if business_name:
-                request.suggestion_info.business_info.business_name = business_name
+                request.suggestion_info.business_context = (
+                    SmartCampaignSuggestionInfo.BusinessContext(
+                        business_name=business_name
+                    )
+                )
 
             if final_url:
                 request.suggestion_info.final_url = final_url
 
             if keyword_text:
-                request.suggestion_info.keyword_seed = keyword_text
+                request.suggestion_info.keyword_themes.append(
+                    KeywordThemeInfo(free_form_keyword_theme=keyword_text)
+                )
 
             # Set location and language
             if location_id:
@@ -197,13 +206,27 @@ class SmartCampaignService:
             # Process results
             themes = []
             for theme in response.keyword_themes:
-                theme_dict = {
+                raw_ktc = theme.keyword_theme_constant
+                if isinstance(raw_ktc, str):
+                    ktc_val = raw_ktc
+                else:
+                    ktc_val = getattr(raw_ktc, "resource_name", "") or ""
+
+                theme_dict: Dict[str, Any] = {
                     "display_name": theme.display_name,
-                    "keyword_theme_constant": theme.keyword_theme_constant,
+                    "keyword_theme_constant": ktc_val,
                 }
 
-                # Add free-form keyword if present
-                if theme.HasField("free_form_keyword_theme"):
+                use_free_form = False
+                if hasattr(theme, "HasField"):
+                    use_free_form = bool(
+                        theme.HasField("free_form_keyword_theme")  # type: ignore[arg-type]
+                    )
+                else:
+                    ff = getattr(theme, "free_form_keyword_theme", None)
+                    use_free_form = isinstance(ff, str) and ff != ""
+
+                if use_free_form:
                     theme_dict["free_form_text"] = theme.free_form_keyword_theme
                     theme_dict["type"] = "FREE_FORM"
                 else:
@@ -256,8 +279,9 @@ class SmartCampaignService:
             request = SuggestSmartCampaignAdRequest()
             request.customer_id = customer_id
 
-            # Set business info
-            request.suggestion_info.business_info.business_name = business_name
+            request.suggestion_info.business_context = (
+                SmartCampaignSuggestionInfo.BusinessContext(business_name=business_name)
+            )
             request.suggestion_info.final_url = final_url
             request.suggestion_info.language_code = (
                 f"languageConstants/{language_id or '1000'}"

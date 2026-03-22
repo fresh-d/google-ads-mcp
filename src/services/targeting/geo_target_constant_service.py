@@ -130,12 +130,8 @@ class GeoTargetConstantService:
             request = SuggestGeoTargetConstantsRequest()
             request.locale = locale
 
-            # Set address
-            address_obj = request.GeoTargets()
-            address_geo_target = address_obj.GeoTarget()
-            address_geo_target.address = address_text
-            address_obj.geo_targets.append(address_geo_target)
-            request.geo_targets = address_obj
+            # Address text uses the location_names query (mutually exclusive with geo_targets).
+            request.location_names.names.append(address_text)
 
             if country_code:
                 request.country_code = country_code
