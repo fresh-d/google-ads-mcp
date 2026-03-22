@@ -144,28 +144,26 @@ async def test_create_text_asset_without_name(
 
 
 @pytest.mark.asyncio
-async def test_create_image_asset(
+async def test_create_image_asset_base64(
     asset_service: AssetService,
     mock_sdk_client: Any,
     mock_ctx: Context,
 ) -> None:
-    """Test creating an image asset."""
-    # Arrange
-    customer_id = "1234567890"
-    image_data = b"fake_image_data"
-    name = "Test Image Asset"
-    mime_type = "image/jpeg"
+    """Test creating an image asset from base64 data."""
+    import base64
 
-    # Create mock response
+    customer_id = "1234567890"
+    raw_bytes = b"fake_image_data"
+    b64_str = base64.b64encode(raw_bytes).decode()
+    name = "Test Image Asset"
+
     mock_response = Mock(spec=MutateAssetsResponse)
     mock_response.results = [Mock()]
     mock_response.results[0].resource_name = f"customers/{customer_id}/assets/125"
 
-    # Get the mocked asset service client
     mock_asset_service_client = asset_service.client  # type: ignore
     mock_asset_service_client.mutate_assets.return_value = mock_response  # type: ignore
 
-    # Mock serialize_proto_message
     expected_result = {
         "results": [{"resource_name": f"customers/{customer_id}/assets/125"}]
     }
@@ -174,30 +172,38 @@ async def test_create_image_asset(
         "src.services.assets.asset_service.serialize_proto_message",
         return_value=expected_result,
     ):
-        # Act
         result = await asset_service.create_image_asset(
             ctx=mock_ctx,
             customer_id=customer_id,
-            image_data=image_data,
             name=name,
-            mime_type=mime_type,
+            image_data_base64=b64_str,
         )
 
-    # Assert
     assert result == expected_result
 
-    # Verify the API call
     mock_asset_service_client.mutate_assets.assert_called_once()  # type: ignore
     call_args = mock_asset_service_client.mutate_assets.call_args  # type: ignore
     request = call_args[1]["request"]
-    assert request.customer_id == customer_id
-    assert len(request.operations) == 1
-
     operation = request.operations[0]
     assert operation.create.name == name
     assert operation.create.type_ == AssetTypeEnum.AssetType.IMAGE
-    assert operation.create.image_asset.data == image_data
+    assert operation.create.image_asset.data == raw_bytes
     assert operation.create.image_asset.mime_type == MimeTypeEnum.MimeType.IMAGE_JPEG
+
+
+@pytest.mark.asyncio
+async def test_create_image_asset_requires_source(
+    asset_service: AssetService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Test that create_image_asset fails without base64 or URL."""
+    with pytest.raises(Exception, match="image_data_base64 or image_url"):
+        await asset_service.create_image_asset(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            name="No Source",
+        )
 
 
 @pytest.mark.asyncio

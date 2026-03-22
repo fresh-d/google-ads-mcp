@@ -1,6 +1,9 @@
 """Asset service implementation using Google Ads SDK."""
 
+import base64
 from typing import Any, Awaitable, Callable, Dict, List, Optional
+
+import aiohttp
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
@@ -116,18 +119,22 @@ class AssetService:
         self,
         ctx: Context,
         customer_id: str,
-        image_data: bytes,
         name: str,
+        image_data_base64: Optional[str] = None,
+        image_url: Optional[str] = None,
         mime_type: str = "image/jpeg",
     ) -> Dict[str, Any]:
-        """Create an image asset.
+        """Create an image asset from base64-encoded data or a URL.
+
+        Provide exactly one of ``image_data_base64`` or ``image_url``.
 
         Args:
             ctx: FastMCP context
             customer_id: The customer ID
-            image_data: The image data as bytes
             name: Name for the asset
-            mime_type: MIME type (image/jpeg, image/png, etc.)
+            image_data_base64: Base64-encoded image bytes
+            image_url: Public URL to download the image from
+            mime_type: MIME type (image/jpeg, image/png, image/gif)
 
         Returns:
             Created asset details
@@ -135,27 +142,37 @@ class AssetService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Create asset
+            if image_url:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(image_url) as resp:
+                        resp.raise_for_status()
+                        raw_bytes = await resp.read()
+                        content_type = resp.content_type or mime_type
+                        if "png" in content_type:
+                            mime_type = "image/png"
+                        elif "gif" in content_type:
+                            mime_type = "image/gif"
+            elif image_data_base64:
+                raw_bytes = base64.b64decode(image_data_base64)
+            else:
+                raise ValueError("Provide either image_data_base64 or image_url")
+
             asset = Asset()
             asset.type_ = AssetTypeEnum.AssetType.IMAGE
             asset.name = name
 
-            # Create image asset
             image_asset = ImageAsset()
-            image_asset.data = image_data
+            image_asset.data = raw_bytes
             image_asset.mime_type = self.get_mime_type_enum(mime_type)
             asset.image_asset = image_asset
 
-            # Create operation
             operation = AssetOperation()
             operation.create = asset
 
-            # Create request
             request = MutateAssetsRequest()
             request.customer_id = customer_id
             request.operations = [operation]
 
-            # Make the API call
             response: MutateAssetsResponse = self.client.mutate_assets(request=request)
 
             return serialize_proto_message(response)
@@ -570,17 +587,21 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
     async def create_image_asset(
         ctx: Context,
         customer_id: str,
-        image_data: bytes,
         name: str,
+        image_data_base64: Optional[str] = None,
+        image_url: Optional[str] = None,
         mime_type: str = "image/jpeg",
     ) -> Dict[str, Any]:
-        """Create an image asset.
+        """Create an image asset from a base64 string or a public URL.
+
+        Provide exactly one of image_data_base64 or image_url.
 
         Args:
             customer_id: The customer ID
-            image_data: The image data as bytes
-            name: Name for the asset
-            mime_type: MIME type (image/jpeg, image/png, image/gif)
+            name: Name for the asset (e.g. "Hero Banner 1200x628")
+            image_data_base64: Base64-encoded image data
+            image_url: Public URL to download the image from (easier for most use cases)
+            mime_type: MIME type - image/jpeg, image/png, or image/gif (auto-detected when using image_url)
 
         Returns:
             Created asset details including resource_name and asset_id
@@ -588,8 +609,9 @@ def create_asset_tools(service: AssetService) -> List[Callable[..., Awaitable[An
         return await service.create_image_asset(
             ctx=ctx,
             customer_id=customer_id,
-            image_data=image_data,
             name=name,
+            image_data_base64=image_data_base64,
+            image_url=image_url,
             mime_type=mime_type,
         )
 
