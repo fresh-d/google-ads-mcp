@@ -20,7 +20,7 @@ from google.ads.googleads.v20.enums.types.keyword_plan_network import (
 from google.ads.googleads.errors import GoogleAdsException
 
 from src.sdk_client import get_sdk_client
-from src.utils import get_logger
+from src.utils import resolve_enum, format_ads_error, format_customer_id, get_logger
 
 logger = get_logger(__name__)
 
@@ -68,6 +68,7 @@ class KeywordPlanIdeaService:
             List of keyword ideas with metrics
         """
         try:
+            customer_id = format_customer_id(customer_id)
             # Create request
             request = GenerateKeywordIdeasRequest()
             request.customer_id = customer_id
@@ -99,7 +100,7 @@ class KeywordPlanIdeaService:
             return keyword_ideas
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -134,6 +135,7 @@ class KeywordPlanIdeaService:
             List of keyword ideas with metrics
         """
         try:
+            customer_id = format_customer_id(customer_id)
             # Create request
             request = GenerateKeywordIdeasRequest()
             request.customer_id = customer_id
@@ -165,7 +167,7 @@ class KeywordPlanIdeaService:
             return keyword_ideas
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -200,6 +202,7 @@ class KeywordPlanIdeaService:
             List of keyword ideas with metrics
         """
         try:
+            customer_id = format_customer_id(customer_id)
             # Create request
             request = GenerateKeywordIdeasRequest()
             request.customer_id = customer_id
@@ -231,7 +234,7 @@ class KeywordPlanIdeaService:
             return keyword_ideas
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -268,6 +271,7 @@ class KeywordPlanIdeaService:
             List of keyword ideas with metrics
         """
         try:
+            customer_id = format_customer_id(customer_id)
             # Create request
             request = GenerateKeywordIdeasRequest()
             request.customer_id = customer_id
@@ -300,7 +304,7 @@ class KeywordPlanIdeaService:
             return keyword_ideas
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -398,8 +402,10 @@ def create_keyword_plan_idea_tools(
             - keyword_annotations: Conceptual categories for the keyword
         """
         # Convert string enum to proper enum type
-        keyword_plan_network_enum = getattr(
-            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        keyword_plan_network_enum = resolve_enum(
+            KeywordPlanNetworkEnum.KeywordPlanNetwork,
+            keyword_plan_network,
+            "keyword_plan_network",
         )
 
         return await service.generate_keyword_ideas_from_keywords(
@@ -438,8 +444,10 @@ def create_keyword_plan_idea_tools(
             List of keyword ideas with metrics and annotations
         """
         # Convert string enum to proper enum type
-        keyword_plan_network_enum = getattr(
-            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        keyword_plan_network_enum = resolve_enum(
+            KeywordPlanNetworkEnum.KeywordPlanNetwork,
+            keyword_plan_network,
+            "keyword_plan_network",
         )
 
         return await service.generate_keyword_ideas_from_url(
@@ -478,8 +486,10 @@ def create_keyword_plan_idea_tools(
             List of keyword ideas with metrics and annotations
         """
         # Convert string enum to proper enum type
-        keyword_plan_network_enum = getattr(
-            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        keyword_plan_network_enum = resolve_enum(
+            KeywordPlanNetworkEnum.KeywordPlanNetwork,
+            keyword_plan_network,
+            "keyword_plan_network",
         )
 
         return await service.generate_keyword_ideas_from_site(
@@ -520,8 +530,10 @@ def create_keyword_plan_idea_tools(
             List of keyword ideas with metrics and annotations
         """
         # Convert string enum to proper enum type
-        keyword_plan_network_enum = getattr(
-            KeywordPlanNetworkEnum.KeywordPlanNetwork, keyword_plan_network
+        keyword_plan_network_enum = resolve_enum(
+            KeywordPlanNetworkEnum.KeywordPlanNetwork,
+            keyword_plan_network,
+            "keyword_plan_network",
         )
 
         return await service.generate_keyword_ideas_from_keywords_and_url(

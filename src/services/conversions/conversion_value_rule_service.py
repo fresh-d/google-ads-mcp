@@ -14,7 +14,7 @@ from google.ads.googleads.v20.services.services.google_ads_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger
+from src.utils import format_ads_error, format_customer_id, get_logger
 
 logger = get_logger(__name__)
 
@@ -71,7 +71,7 @@ class ConversionValueRuleService:
             }
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -113,7 +113,7 @@ class ConversionValueRuleService:
             }
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -226,7 +226,7 @@ class ConversionValueRuleService:
             raise NotImplementedError
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:

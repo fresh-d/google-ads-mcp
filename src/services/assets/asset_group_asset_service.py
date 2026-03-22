@@ -18,7 +18,13 @@ from google.ads.googleads.v20.services.types.asset_group_asset_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    resolve_enum,
+    format_ads_error,
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+)
 
 logger = get_logger(__name__)
 
@@ -108,7 +114,7 @@ class AssetGroupAssetService:
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -179,7 +185,7 @@ class AssetGroupAssetService:
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -242,7 +248,7 @@ class AssetGroupAssetService:
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -300,7 +306,9 @@ def create_asset_group_asset_tools(
             )
         """
         # Convert string enum to proper enum type
-        field_type_enum = getattr(AssetFieldTypeEnum.AssetFieldType, field_type)
+        field_type_enum = resolve_enum(
+            AssetFieldTypeEnum.AssetFieldType, field_type, "field_type"
+        )
 
         return await service.create_asset_group_asset(
             ctx=ctx,
@@ -347,8 +355,12 @@ def create_asset_group_asset_tools(
             )
         """
         # Convert string enums to proper enum types
-        field_type_enum = getattr(AssetFieldTypeEnum.AssetFieldType, field_type)
-        status_enum = getattr(AssetLinkStatusEnum.AssetLinkStatus, status)
+        field_type_enum = resolve_enum(
+            AssetFieldTypeEnum.AssetFieldType, field_type, "field_type"
+        )
+        status_enum = resolve_enum(
+            AssetLinkStatusEnum.AssetLinkStatus, status, "status"
+        )
 
         return await service.update_asset_group_asset_status(
             ctx=ctx,
@@ -394,7 +406,9 @@ def create_asset_group_asset_tools(
             )
         """
         # Convert string enum to proper enum type
-        field_type_enum = getattr(AssetFieldTypeEnum.AssetFieldType, field_type)
+        field_type_enum = resolve_enum(
+            AssetFieldTypeEnum.AssetFieldType, field_type, "field_type"
+        )
 
         return await service.remove_asset_group_asset(
             ctx=ctx,

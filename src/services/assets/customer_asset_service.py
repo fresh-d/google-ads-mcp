@@ -27,6 +27,7 @@ from google.ads.googleads.v20.enums.types.asset_link_status import (
 )
 from google.protobuf import field_mask_pb2
 
+from src.utils import resolve_enum
 from src.sdk_client import get_sdk_client
 
 
@@ -267,8 +268,10 @@ def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
         service = CustomerAssetService()
 
         # Convert response content type string to enum
-        response_content_type_enum = getattr(
-            ResponseContentTypeEnum.ResponseContentType, response_content_type
+        response_content_type_enum = resolve_enum(
+            ResponseContentTypeEnum.ResponseContentType,
+            response_content_type,
+            "response_content_type",
         )
 
         ops = []
@@ -373,8 +376,12 @@ def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
         service = CustomerAssetService()
 
         # Convert strings to enums
-        field_type_enum = getattr(AssetFieldTypeEnum.AssetFieldType, field_type)
-        status_enum = getattr(AssetLinkStatusEnum.AssetLinkStatus, status)
+        field_type_enum = resolve_enum(
+            AssetFieldTypeEnum.AssetFieldType, field_type, "field_type"
+        )
+        status_enum = resolve_enum(
+            AssetLinkStatusEnum.AssetLinkStatus, status, "status"
+        )
 
         response = service.create_customer_asset(
             customer_id=customer_id,
@@ -414,7 +421,9 @@ def register_customer_asset_tools(mcp: FastMCP[Any]) -> None:
         service = CustomerAssetService()
 
         # Convert string to enum
-        status_enum = getattr(AssetLinkStatusEnum.AssetLinkStatus, status)
+        status_enum = resolve_enum(
+            AssetLinkStatusEnum.AssetLinkStatus, status, "status"
+        )
 
         response = service.update_customer_asset_status(
             customer_id=customer_id,

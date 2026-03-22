@@ -23,7 +23,13 @@ from google.ads.googleads.v20.services.types.campaign_shared_set_service import 
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    resolve_enum,
+    format_ads_error,
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+)
 
 logger = get_logger(__name__)
 
@@ -73,8 +79,8 @@ class CampaignSharedSetService:
             campaign_shared_set = CampaignSharedSet()
             campaign_shared_set.campaign = campaign_resource
             campaign_shared_set.shared_set = shared_set_resource
-            campaign_shared_set.status = getattr(
-                CampaignSharedSetStatusEnum.CampaignSharedSetStatus, status
+            campaign_shared_set.status = resolve_enum(
+                CampaignSharedSetStatusEnum.CampaignSharedSetStatus, status, "status"
             )
 
             # Create operation
@@ -99,7 +105,7 @@ class CampaignSharedSetService:
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -142,8 +148,10 @@ class CampaignSharedSetService:
                 campaign_shared_set = CampaignSharedSet()
                 campaign_shared_set.campaign = campaign_resource
                 campaign_shared_set.shared_set = shared_set_resource
-                campaign_shared_set.status = getattr(
-                    CampaignSharedSetStatusEnum.CampaignSharedSetStatus, status
+                campaign_shared_set.status = resolve_enum(
+                    CampaignSharedSetStatusEnum.CampaignSharedSetStatus,
+                    status,
+                    "status",
                 )
 
                 # Create operation
@@ -169,7 +177,7 @@ class CampaignSharedSetService:
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -230,8 +238,10 @@ class CampaignSharedSetService:
                 campaign_shared_set = CampaignSharedSet()
                 campaign_shared_set.campaign = campaign_resource
                 campaign_shared_set.shared_set = shared_set_resource
-                campaign_shared_set.status = getattr(
-                    CampaignSharedSetStatusEnum.CampaignSharedSetStatus, status
+                campaign_shared_set.status = resolve_enum(
+                    CampaignSharedSetStatusEnum.CampaignSharedSetStatus,
+                    status,
+                    "status",
                 )
 
                 create_operation = CampaignSharedSetOperation()
@@ -254,7 +264,7 @@ class CampaignSharedSetService:
                 return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -383,7 +393,7 @@ class CampaignSharedSetService:
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:

@@ -28,6 +28,7 @@ from google.ads.googleads.v20.enums.types.customizer_attribute_type import (
 from google.ads.googleads.v20.common.types.customizer_value import CustomizerValue
 
 from src.sdk_client import get_sdk_client
+from src.utils import resolve_enum, format_customer_id
 
 
 class CustomerCustomizerService:
@@ -75,6 +76,7 @@ class CustomerCustomizerService:
             Exception: If the request fails.
         """
         try:
+            customer_id = format_customer_id(customer_id)
             request = MutateCustomerCustomizersRequest(
                 customer_id=customer_id,
                 operations=operations,
@@ -148,6 +150,7 @@ class CustomerCustomizerService:
         Returns:
             MutateCustomerCustomizersResponse: The response containing the result.
         """
+        customer_id = format_customer_id(customer_id)
         operation = self.create_customer_customizer_operation(
             customizer_attribute=customizer_attribute,
             value_type=value_type,
@@ -176,6 +179,7 @@ class CustomerCustomizerService:
         Returns:
             MutateCustomerCustomizersResponse: The response containing the result.
         """
+        customer_id = format_customer_id(customer_id)
         operation = self.create_remove_operation(resource_name=resource_name)
 
         return self.mutate_customer_customizers(
@@ -202,6 +206,7 @@ class CustomerCustomizerService:
         Returns:
             MutateCustomerCustomizersResponse: The response containing the result.
         """
+        customer_id = format_customer_id(customer_id)
         return self.create_customer_customizer(
             customer_id=customer_id,
             customizer_attribute=customizer_attribute,
@@ -228,6 +233,7 @@ class CustomerCustomizerService:
         Returns:
             MutateCustomerCustomizersResponse: The response containing the result.
         """
+        customer_id = format_customer_id(customer_id)
         return self.create_customer_customizer(
             customer_id=customer_id,
             customizer_attribute=customizer_attribute,
@@ -254,6 +260,7 @@ class CustomerCustomizerService:
         Returns:
             MutateCustomerCustomizersResponse: The response containing the result.
         """
+        customer_id = format_customer_id(customer_id)
         return self.create_customer_customizer(
             customer_id=customer_id,
             customizer_attribute=customizer_attribute,
@@ -280,6 +287,7 @@ class CustomerCustomizerService:
         Returns:
             MutateCustomerCustomizersResponse: The response containing the result.
         """
+        customer_id = format_customer_id(customer_id)
         return self.create_customer_customizer(
             customer_id=customer_id,
             customizer_attribute=customizer_attribute,
@@ -315,8 +323,10 @@ def register_customer_customizer_tools(mcp: FastMCP[Any]) -> None:
         service = CustomerCustomizerService()
 
         # Convert response content type string to enum
-        response_content_type_enum = getattr(
-            ResponseContentTypeEnum.ResponseContentType, response_content_type
+        response_content_type_enum = resolve_enum(
+            ResponseContentTypeEnum.ResponseContentType,
+            response_content_type,
+            "response_content_type",
         )
 
         ops = []
@@ -406,8 +416,10 @@ def register_customer_customizer_tools(mcp: FastMCP[Any]) -> None:
         service = CustomerCustomizerService()
 
         # Convert string to enum
-        value_type_enum = getattr(
-            CustomizerAttributeTypeEnum.CustomizerAttributeType, value_type
+        value_type_enum = resolve_enum(
+            CustomizerAttributeTypeEnum.CustomizerAttributeType,
+            value_type,
+            "value_type",
         )
 
         response = service.create_customer_customizer(

@@ -216,6 +216,7 @@ async def lifespan(app: Any) -> AsyncGenerator[None, None]:  # noqa: ARG001
     client = None
     try:
         client = GoogleAdsSdkClient()
+        client.validate()
         set_sdk_client(client)
         logger.info("Google Ads SDK client initialized successfully")
         yield

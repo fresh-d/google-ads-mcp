@@ -13,7 +13,12 @@ from google.ads.googleads.v20.services.types.google_ads_service import (
 )
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    format_ads_error,
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+)
 
 logger = get_logger(__name__)
 
@@ -96,7 +101,7 @@ class SearchService:
             return results
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -176,7 +181,7 @@ class SearchService:
             return results
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -254,7 +259,7 @@ class SearchService:
             return results
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -349,7 +354,7 @@ class SearchService:
             return results
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:

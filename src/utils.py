@@ -1,8 +1,12 @@
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, TypeVar
+
+from google.ads.googleads.errors import GoogleAdsException
 from google.protobuf.json_format import MessageToDict
+
+E = TypeVar("E")
 
 
 def get_logger(name: str) -> logging.Logger:
@@ -48,6 +52,38 @@ def format_customer_id(customer_id: str) -> str:
         The customer ID without hyphens (e.g., "1234567890")
     """
     return customer_id.replace("-", "")
+
+
+def resolve_enum(enum_class: Any, value: str, param_name: str = "parameter") -> Any:
+    """Safely convert a string to a protobuf enum value.
+
+    Raises ``ValueError`` with a list of valid values instead of a raw
+    ``AttributeError`` when the caller supplies an invalid name.
+    """
+    result = getattr(enum_class, value, None)
+    if result is not None:
+        return result
+    try:
+        valid = sorted(m.name for m in enum_class if not m.name.startswith("_"))
+    except TypeError:
+        valid = []
+    raise ValueError(
+        f"Invalid {param_name} '{value}'. Valid values: {', '.join(valid)}"
+    )
+
+
+def format_ads_error(ex: GoogleAdsException) -> str:
+    """Extract concise, LLM-readable error messages from a GoogleAdsException.
+
+    Instead of dumping the raw protobuf ``GoogleAdsFailure``, this pulls the
+    human-readable ``.message`` from each ``GoogleAdsError`` and includes the
+    ``request_id`` for debugging.
+    """
+    parts: list[str] = []
+    for error in ex.failure.errors:
+        parts.append(error.message or "Unknown error")
+    summary = "; ".join(parts) if parts else str(ex)
+    return f"Google Ads API error (request_id={ex.request_id}): {summary}"
 
 
 def serialize_proto_message(

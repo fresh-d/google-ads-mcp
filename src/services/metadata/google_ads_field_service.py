@@ -17,7 +17,12 @@ from google.ads.googleads.v20.enums.types.google_ads_field_category import (
 from google.ads.googleads.errors import GoogleAdsException
 
 from src.sdk_client import get_sdk_client
-from src.utils import get_logger, serialize_proto_message
+from src.utils import (
+    resolve_enum,
+    format_ads_error,
+    get_logger,
+    serialize_proto_message,
+)
 
 logger = get_logger(__name__)
 
@@ -68,7 +73,7 @@ class GoogleAdsFieldService:
             return serialize_proto_message(field)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -135,7 +140,7 @@ class GoogleAdsFieldService:
             return fields
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -321,8 +326,10 @@ def create_google_ads_field_tools(
         # Convert string category_filter to enum if provided
         category_filter_enum = None
         if category_filter:
-            category_filter_enum = getattr(
-                GoogleAdsFieldCategoryEnum.GoogleAdsFieldCategory, category_filter
+            category_filter_enum = resolve_enum(
+                GoogleAdsFieldCategoryEnum.GoogleAdsFieldCategory,
+                category_filter,
+                "category_filter",
             )
 
         return await service.search_fields(

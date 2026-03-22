@@ -32,7 +32,13 @@ from google.ads.googleads.v20.services.services.google_ads_service import (
 from google.protobuf import field_mask_pb2
 
 from src.sdk_client import get_sdk_client
-from src.utils import format_customer_id, get_logger, serialize_proto_message
+from src.utils import (
+    resolve_enum,
+    format_ads_error,
+    format_customer_id,
+    get_logger,
+    serialize_proto_message,
+)
 
 logger = get_logger(__name__)
 
@@ -91,11 +97,11 @@ class BiddingDataExclusionService:
             # Create bidding data exclusion
             exclusion = BiddingDataExclusion()
             exclusion.name = name
-            exclusion.scope = getattr(
-                SeasonalityEventScopeEnum.SeasonalityEventScope, scope
+            exclusion.scope = resolve_enum(
+                SeasonalityEventScopeEnum.SeasonalityEventScope, scope, "scope"
             )
-            exclusion.status = getattr(
-                SeasonalityEventStatusEnum.SeasonalityEventStatus, status
+            exclusion.status = resolve_enum(
+                SeasonalityEventStatusEnum.SeasonalityEventStatus, status, "status"
             )
             exclusion.start_date_time = start_date_time
             exclusion.end_date_time = end_date_time
@@ -120,7 +126,9 @@ class BiddingDataExclusionService:
             # Set devices
             if devices:
                 for device in devices:
-                    exclusion.devices.append(getattr(DeviceEnum.Device, device))
+                    exclusion.devices.append(
+                        resolve_enum(DeviceEnum.Device, device, "device")
+                    )
 
             # Create operation
             operation = BiddingDataExclusionOperation()
@@ -145,7 +153,7 @@ class BiddingDataExclusionService:
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -202,8 +210,8 @@ class BiddingDataExclusionService:
                 update_mask_paths.append("end_date_time")
 
             if status is not None:
-                exclusion.status = getattr(
-                    SeasonalityEventStatusEnum.SeasonalityEventStatus, status
+                exclusion.status = resolve_enum(
+                    SeasonalityEventStatusEnum.SeasonalityEventStatus, status, "status"
                 )
                 update_mask_paths.append("status")
 
@@ -235,7 +243,7 @@ class BiddingDataExclusionService:
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
@@ -369,7 +377,7 @@ class BiddingDataExclusionService:
             return serialize_proto_message(response)
 
         except GoogleAdsException as e:
-            error_msg = f"Google Ads API error: {e.failure}"
+            error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:

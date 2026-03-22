@@ -50,6 +50,20 @@ class GoogleAdsSdkClient:
             logger.info("Google Ads SDK client initialized successfully")
         return self._client
 
+    def validate(self) -> None:
+        """Eagerly build the client and verify credentials.
+
+        Calls ``list_accessible_customers`` which is lightweight, free, and
+        proves that the OAuth / service-account token is valid.
+        """
+        try:
+            customer_service = self.client.get_service("CustomerService")
+            customer_service.list_accessible_customers()
+            logger.info("Credential validation passed")
+        except Exception:
+            logger.error("Credential validation FAILED – check your config")
+            raise
+
     def close(self) -> None:
         """Close the client and clean up resources."""
         if self._client:
