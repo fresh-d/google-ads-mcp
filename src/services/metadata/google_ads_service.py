@@ -351,7 +351,94 @@ def create_google_ads_tools(
             summary_row_setting=summary_row_setting,
         )
 
-    tools.extend([search_google_ads, search_google_ads_stream])
+    async def atomic_mutate(
+        ctx: Context,
+        customer_id: str,
+        operations: List[Dict[str, Any]],
+        partial_failure: bool = False,
+        validate_only: bool = False,
+    ) -> Dict[str, Any]:
+        """Execute multiple heterogeneous mutate operations atomically.
+
+        This is the key tool for PMax campaign setup: create a campaign budget,
+        campaign, asset group, and link assets to it -- all in one atomic request
+        using temporary resource names (negative IDs).
+
+        Temporary resource names let you reference not-yet-created resources.
+        Use the format ``customers/{customer_id}/{resource_type}/{negative_id}``
+        where negative_id is -1, -2, -3, etc.
+
+        Args:
+            customer_id: The customer ID
+            operations: List of operation dicts. Each dict must have exactly ONE
+                key matching a MutateOperation field name, with a nested dict
+                containing ``create``, ``update``, or ``remove``.
+
+                Supported operation field names (most common):
+                - campaign_budget_operation
+                - campaign_operation
+                - campaign_criterion_operation
+                - asset_operation
+                - asset_group_operation
+                - asset_group_asset_operation
+                - asset_group_signal_operation
+                - ad_group_operation
+                - ad_group_ad_operation
+                - ad_group_criterion_operation
+                - ad_group_asset_operation
+                - campaign_asset_operation
+                - (and any other *_operation field on MutateOperation)
+            partial_failure: If true, valid operations succeed even if others fail
+            validate_only: If true, only validates without executing
+
+        Returns:
+            Dict with ``results`` list and optional ``partial_failure_error``
+
+        Example -- create PMax campaign with asset group atomically:
+            operations=[
+                {"campaign_budget_operation": {"create": {
+                    "resource_name": "customers/123/campaignBudgets/-1",
+                    "name": "PMax Budget",
+                    "amount_micros": 5000000
+                }}},
+                {"campaign_operation": {"create": {
+                    "resource_name": "customers/123/campaigns/-2",
+                    "name": "PMax Campaign",
+                    "campaign_budget": "customers/123/campaignBudgets/-1",
+                    "advertising_channel_type": "PERFORMANCE_MAX",
+                    "status": "PAUSED",
+                    "maximize_conversions": {}
+                }}},
+                {"asset_group_operation": {"create": {
+                    "resource_name": "customers/123/assetGroups/-3",
+                    "campaign": "customers/123/campaigns/-2",
+                    "name": "Main Asset Group",
+                    "final_urls": ["https://example.com"]
+                }}},
+                {"asset_group_asset_operation": {"create": {
+                    "asset_group": "customers/123/assetGroups/-3",
+                    "asset": "customers/123/assets/EXISTING_ASSET_ID",
+                    "field_type": "HEADLINE"
+                }}}
+            ]
+        """
+        from google.protobuf.json_format import ParseDict
+
+        mutate_ops: list[MutateOperation] = []
+        for op_dict in operations:
+            mutate_op = MutateOperation()
+            ParseDict(op_dict, mutate_op._pb)
+            mutate_ops.append(mutate_op)
+
+        return await service.mutate(
+            ctx=ctx,
+            customer_id=customer_id,
+            operations=mutate_ops,
+            partial_failure=partial_failure,
+            validate_only=validate_only,
+        )
+
+    tools.extend([search_google_ads, search_google_ads_stream, atomic_mutate])
     return tools
 
 

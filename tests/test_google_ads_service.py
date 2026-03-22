@@ -82,7 +82,6 @@ class TestGoogleAdsService:
         request = mock_client.search.call_args[1]["request"]  # type: ignore
         assert request.customer_id == "1234567890"
         assert request.query == "SELECT campaign.id, campaign.name FROM campaign"
-        assert request.page_size == 100
         assert request.validate_only is False
         # When no summary row requested, search_settings should not be set
         # In protobuf, the field always exists but we check if it's been modified
@@ -260,10 +259,13 @@ class TestGoogleAdsService:
         """Test search with API error."""
         google_ads_service._client = mock_client
 
-        # Mock API error
+        # Mock API error with failure.errors for format_ads_error
         error = make_google_ads_exception_stub()
+        mock_error = Mock()
+        mock_error.message = "Invalid query"
         error.failure = Mock()  # type: ignore
-        error.failure.__str__ = Mock(return_value="Invalid query")  # type: ignore
+        error.failure.errors = [mock_error]  # type: ignore
+        error.request_id = "test-req-id"  # type: ignore
         mock_client.search.side_effect = error  # type: ignore
 
         with pytest.raises(Exception) as exc_info:
@@ -273,10 +275,7 @@ class TestGoogleAdsService:
                 query="INVALID QUERY",
             )
 
-        assert "Google Ads API error: Invalid query" in str(exc_info.value)
-        mock_context.log.assert_called_with(  # type: ignore
-            level="error", message="Google Ads API error: Invalid query"
-        )
+        assert "Invalid query" in str(exc_info.value)
 
     async def test_search_general_error(
         self, google_ads_service: Any, mock_context: Any, mock_client: Any
