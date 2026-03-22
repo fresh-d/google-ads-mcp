@@ -1,0 +1,9 @@
+fix: pin get_service() to version="v20" to prevent v23 mismatch
+
+google-ads SDK 29.x defaults to v23 for get_service(), but all code
+builds v20 protobuf objects. Passing a v20 request to a v23 service
+client triggers "Invalid constructor input for MutateXxxRequest"
+because the v23 client tries to re-wrap the proto in its own types.
+
+Fixed 82 get_service() calls across 77 files to explicitly pass
+version="v20".

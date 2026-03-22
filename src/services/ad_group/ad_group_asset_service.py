@@ -44,7 +44,9 @@ class AdGroupAssetService:
         """Get the ad group asset service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service("AdGroupAssetService")
+            self._client = sdk_client.client.get_service(
+                "AdGroupAssetService", version="v20"
+            )
         assert self._client is not None
         return self._client
 

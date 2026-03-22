@@ -49,7 +49,9 @@ class KeywordPlanService:
         """Get the keyword plan service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service("KeywordPlanService")
+            self._client = sdk_client.client.get_service(
+                "KeywordPlanService", version="v20"
+            )
         assert self._client is not None
         return self._client
 
@@ -234,7 +236,9 @@ class KeywordPlanService:
             # Use KeywordPlanCampaignService
             sdk_client = get_sdk_client()
             campaign_service: KeywordPlanCampaignServiceClient = (
-                sdk_client.client.get_service("KeywordPlanCampaignService")
+                sdk_client.client.get_service(
+                    "KeywordPlanCampaignService", version="v20"
+                )
             )
 
             from google.ads.googleads.v20.resources.types.keyword_plan_campaign import (
@@ -319,7 +323,9 @@ class KeywordPlanService:
             # Use KeywordPlanAdGroupKeywordService
             sdk_client = get_sdk_client()
             keyword_service: KeywordPlanAdGroupKeywordServiceClient = (
-                sdk_client.client.get_service("KeywordPlanAdGroupKeywordService")
+                sdk_client.client.get_service(
+                    "KeywordPlanAdGroupKeywordService", version="v20"
+                )
             )
 
             from google.ads.googleads.v20.enums.types.keyword_match_type import (
