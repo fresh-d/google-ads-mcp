@@ -140,7 +140,7 @@ async def test_get_recommendations(
 
     mock_google_ads_service.search.return_value = mock_results  # type: ignore
 
-    def get_service_side_effect(service_name: str):
+    def get_service_side_effect(service_name: str, **_: Any) -> Any:
         if service_name == "GoogleAdsService":
             return mock_google_ads_service
         return recommendation_service.client
@@ -312,7 +312,7 @@ async def test_get_recommendations_minimal(
     mock_google_ads_service = Mock()
     mock_google_ads_service.search.return_value = []  # type: ignore
 
-    def get_service_side_effect(service_name: str):
+    def get_service_side_effect(service_name: str, **_: Any) -> Any:
         if service_name == "GoogleAdsService":
             return mock_google_ads_service
         return recommendation_service.client

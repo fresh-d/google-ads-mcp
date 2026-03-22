@@ -75,10 +75,10 @@ class RecommendationService:
             # Use GoogleAdsService for search
             sdk_client = get_sdk_client()
             google_ads_service: GoogleAdsServiceClient = sdk_client.client.get_service(
-                "GoogleAdsService"
+                "GoogleAdsService", version="v20"
             )
 
-            # Build query
+            # Build query -- only select fields valid in v20 GAQL
             query = """
                 SELECT
                     recommendation.type,
@@ -92,11 +92,10 @@ class RecommendationService:
                     recommendation.text_ad_recommendation,
                     recommendation.target_cpa_opt_in_recommendation,
                     recommendation.responsive_search_ad_recommendation,
-                    recommendation.sitelink_extension_recommendation
+                    recommendation.sitelink_asset_recommendation
                 FROM recommendation
             """
 
-            # Add filters
             conditions = []
             if not dismissed:
                 conditions.append("recommendation.dismissed = FALSE")
@@ -115,7 +114,7 @@ class RecommendationService:
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
 
-            query += f" ORDER BY recommendation.impact.base_metrics.clicks DESC LIMIT {limit}"
+            query += f" LIMIT {limit}"
 
             # Execute search
             response = google_ads_service.search(customer_id=customer_id, query=query)
