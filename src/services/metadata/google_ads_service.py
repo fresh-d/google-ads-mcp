@@ -85,7 +85,6 @@ class GoogleAdsService:
             request = SearchGoogleAdsRequest()
             request.customer_id = customer_id
             request.query = query
-            request.page_size = min(page_size, 10000)  # Max allowed by API
             if page_token:
                 request.page_token = page_token
             request.validate_only = validate_only
