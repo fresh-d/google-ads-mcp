@@ -20,7 +20,15 @@ from google.ads.googleads.v20.enums.types.keyword_plan_network import (
 from google.ads.googleads.errors import GoogleAdsException
 
 from src.sdk_client import get_sdk_client
-from src.utils import resolve_enum, format_ads_error, format_customer_id, get_logger
+from src.utils import (
+    RATE_LIMIT_MSG,
+    resolve_enum,
+    format_ads_error,
+    format_customer_id,
+    get_logger,
+    ensure_list,
+    is_resource_exhausted,
+)
 
 logger = get_logger(__name__)
 
@@ -53,7 +61,8 @@ class KeywordPlanIdeaService:
         keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
         include_adult_keywords: bool = False,
         page_size: int = 100,
-    ) -> List[Dict[str, Any]]:
+        page_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Generate keyword ideas from seed keywords.
 
         Args:
@@ -78,6 +87,8 @@ class KeywordPlanIdeaService:
             request.geo_target_constants.extend(geo_target_constants)
             request.include_adult_keywords = include_adult_keywords
             request.page_size = page_size
+            if page_token:
+                request.page_token = page_token
             # Set keyword plan network using enum
             request.keyword_plan_network = keyword_plan_network
 
@@ -86,26 +97,34 @@ class KeywordPlanIdeaService:
             keyword_seed.keywords.extend(keywords)
             request.keyword_seed = keyword_seed
 
-            # Generate ideas
-            response = self.client.generate_keyword_ideas(request=request)
+            # Generate ideas — only take the first page to avoid
+            # burning through the 1 QPS planning quota with auto-pagination.
+            pager = self.client.generate_keyword_ideas(request=request)
+            first_page = next(pager.pages)
 
-            # Process results
-            keyword_ideas = []
-            for idea in response:
-                keyword_ideas.append(self._format_keyword_idea(idea))
+            keyword_ideas = [
+                self._format_keyword_idea(idea) for idea in first_page.results
+            ]
+
+            result: Dict[str, Any] = {"results": keyword_ideas}
+            if first_page.next_page_token:
+                result["next_page_token"] = first_page.next_page_token
 
             await ctx.log(
                 level="info",
                 message=f"Generated {len(keyword_ideas)} keyword ideas from {len(keywords)} seed keywords",
             )
 
-            return keyword_ideas
+            return result
 
         except GoogleAdsException as e:
             error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
+            if is_resource_exhausted(e):
+                await ctx.log(level="error", message=RATE_LIMIT_MSG)
+                raise Exception(RATE_LIMIT_MSG) from e
             error_msg = f"Failed to generate keyword ideas: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
@@ -120,7 +139,8 @@ class KeywordPlanIdeaService:
         keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
         include_adult_keywords: bool = False,
         page_size: int = 100,
-    ) -> List[Dict[str, Any]]:
+        page_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Generate keyword ideas from a URL.
 
         Args:
@@ -145,6 +165,8 @@ class KeywordPlanIdeaService:
             request.geo_target_constants.extend(geo_target_constants)
             request.include_adult_keywords = include_adult_keywords
             request.page_size = page_size
+            if page_token:
+                request.page_token = page_token
             # Set keyword plan network using enum
             request.keyword_plan_network = keyword_plan_network
 
@@ -153,26 +175,33 @@ class KeywordPlanIdeaService:
             url_seed.url = page_url
             request.url_seed = url_seed
 
-            # Generate ideas
-            response = self.client.generate_keyword_ideas(request=request)
+            # Generate ideas — first page only (1 QPS planning quota)
+            pager = self.client.generate_keyword_ideas(request=request)
+            first_page = next(pager.pages)
 
-            # Process results
-            keyword_ideas = []
-            for idea in response:
-                keyword_ideas.append(self._format_keyword_idea(idea))
+            keyword_ideas = [
+                self._format_keyword_idea(idea) for idea in first_page.results
+            ]
+
+            result: Dict[str, Any] = {"results": keyword_ideas}
+            if first_page.next_page_token:
+                result["next_page_token"] = first_page.next_page_token
 
             await ctx.log(
                 level="info",
                 message=f"Generated {len(keyword_ideas)} keyword ideas from URL: {page_url}",
             )
 
-            return keyword_ideas
+            return result
 
         except GoogleAdsException as e:
             error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
+            if is_resource_exhausted(e):
+                await ctx.log(level="error", message=RATE_LIMIT_MSG)
+                raise Exception(RATE_LIMIT_MSG) from e
             error_msg = f"Failed to generate keyword ideas from URL: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
@@ -187,7 +216,8 @@ class KeywordPlanIdeaService:
         keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
         include_adult_keywords: bool = False,
         page_size: int = 100,
-    ) -> List[Dict[str, Any]]:
+        page_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Generate keyword ideas from an entire website.
 
         Args:
@@ -212,6 +242,8 @@ class KeywordPlanIdeaService:
             request.geo_target_constants.extend(geo_target_constants)
             request.include_adult_keywords = include_adult_keywords
             request.page_size = page_size
+            if page_token:
+                request.page_token = page_token
             # Set keyword plan network using enum
             request.keyword_plan_network = keyword_plan_network
 
@@ -220,26 +252,33 @@ class KeywordPlanIdeaService:
             site_seed.site = site_url
             request.site_seed = site_seed
 
-            # Generate ideas
-            response = self.client.generate_keyword_ideas(request=request)
+            # Generate ideas — first page only (1 QPS planning quota)
+            pager = self.client.generate_keyword_ideas(request=request)
+            first_page = next(pager.pages)
 
-            # Process results
-            keyword_ideas = []
-            for idea in response:
-                keyword_ideas.append(self._format_keyword_idea(idea))
+            keyword_ideas = [
+                self._format_keyword_idea(idea) for idea in first_page.results
+            ]
+
+            result: Dict[str, Any] = {"results": keyword_ideas}
+            if first_page.next_page_token:
+                result["next_page_token"] = first_page.next_page_token
 
             await ctx.log(
                 level="info",
                 message=f"Generated {len(keyword_ideas)} keyword ideas from site: {site_url}",
             )
 
-            return keyword_ideas
+            return result
 
         except GoogleAdsException as e:
             error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
+            if is_resource_exhausted(e):
+                await ctx.log(level="error", message=RATE_LIMIT_MSG)
+                raise Exception(RATE_LIMIT_MSG) from e
             error_msg = f"Failed to generate keyword ideas from site: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
@@ -255,7 +294,8 @@ class KeywordPlanIdeaService:
         keyword_plan_network: KeywordPlanNetworkEnum.KeywordPlanNetwork = KeywordPlanNetworkEnum.KeywordPlanNetwork.GOOGLE_SEARCH_AND_PARTNERS,
         include_adult_keywords: bool = False,
         page_size: int = 100,
-    ) -> List[Dict[str, Any]]:
+        page_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Generate keyword ideas from both keywords and a URL.
 
         Args:
@@ -281,6 +321,8 @@ class KeywordPlanIdeaService:
             request.geo_target_constants.extend(geo_target_constants)
             request.include_adult_keywords = include_adult_keywords
             request.page_size = page_size
+            if page_token:
+                request.page_token = page_token
             # Set keyword plan network using enum
             request.keyword_plan_network = keyword_plan_network
 
@@ -290,26 +332,33 @@ class KeywordPlanIdeaService:
             keyword_and_url_seed.url = page_url
             request.keyword_and_url_seed = keyword_and_url_seed
 
-            # Generate ideas
-            response = self.client.generate_keyword_ideas(request=request)
+            # Generate ideas — first page only (1 QPS planning quota)
+            pager = self.client.generate_keyword_ideas(request=request)
+            first_page = next(pager.pages)
 
-            # Process results
-            keyword_ideas = []
-            for idea in response:
-                keyword_ideas.append(self._format_keyword_idea(idea))
+            keyword_ideas = [
+                self._format_keyword_idea(idea) for idea in first_page.results
+            ]
+
+            result: Dict[str, Any] = {"results": keyword_ideas}
+            if first_page.next_page_token:
+                result["next_page_token"] = first_page.next_page_token
 
             await ctx.log(
                 level="info",
                 message=f"Generated {len(keyword_ideas)} keyword ideas from keywords and URL",
             )
 
-            return keyword_ideas
+            return result
 
         except GoogleAdsException as e:
             error_msg = format_ads_error(e)
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
         except Exception as e:
+            if is_resource_exhausted(e):
+                await ctx.log(level="error", message=RATE_LIMIT_MSG)
+                raise Exception(RATE_LIMIT_MSG) from e
             error_msg = f"Failed to generate keyword ideas: {str(e)}"
             await ctx.log(level="error", message=error_msg)
             raise Exception(error_msg) from e
@@ -385,8 +434,11 @@ def create_keyword_plan_idea_tools(
         keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
         include_adult_keywords: bool = False,
         page_size: int = 100,
-    ) -> List[Dict[str, Any]]:
-        """Generate keyword ideas from seed keywords.
+        page_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generate keyword ideas from seed keywords. Returns ONE page of results.
+
+        This API has a strict rate limit of 1 request per second. Do NOT call repeatedly in quick succession.
 
         Args:
             customer_id: The customer ID
@@ -398,11 +450,14 @@ def create_keyword_plan_idea_tools(
             page_size: Number of results per page (max 10000)
 
         Returns:
-            List of keyword ideas with:
-            - text: The keyword text
-            - keyword_idea_metrics: Metrics including avg_monthly_searches, competition, bid estimates
-            - keyword_annotations: Conceptual categories for the keyword
+            Dict with:
+            - results: List of keyword ideas, each with text, keyword_idea_metrics (avg_monthly_searches, competition, bid estimates), keyword_annotations
+            - next_page_token (optional): If present, more results are available. Pass this value as page_token in a subsequent call. Wait at least 2 seconds between calls.
         """
+        # Normalize list params (MCP clients may send JSON strings)
+        keywords = ensure_list(keywords)
+        geo_target_constants = ensure_list(geo_target_constants)
+
         # Convert string enum to proper enum type
         keyword_plan_network_enum = resolve_enum(
             KeywordPlanNetworkEnum.KeywordPlanNetwork,
@@ -419,6 +474,7 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network=keyword_plan_network_enum,
             include_adult_keywords=include_adult_keywords,
             page_size=page_size,
+            page_token=page_token,
         )
 
     async def generate_keyword_ideas_from_url(
@@ -430,8 +486,11 @@ def create_keyword_plan_idea_tools(
         keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
         include_adult_keywords: bool = False,
         page_size: int = 100,
-    ) -> List[Dict[str, Any]]:
-        """Generate keyword ideas from a specific URL/page.
+        page_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generate keyword ideas from a specific URL/page. Returns ONE page of results.
+
+        This API has a strict rate limit of 1 request per second. Do NOT call repeatedly in quick succession.
 
         Args:
             customer_id: The customer ID
@@ -441,10 +500,14 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network: Network type - UNSPECIFIED, GOOGLE_SEARCH, or GOOGLE_SEARCH_AND_PARTNERS
             include_adult_keywords: Whether to include adult keywords in results
             page_size: Number of results per page (max 10000)
+            page_token: Token from a previous response's next_page_token to fetch the next page. Wait at least 2 seconds between calls.
 
         Returns:
-            List of keyword ideas with metrics and annotations
+            Dict with results list and optional next_page_token for pagination. Wait at least 2 seconds between paginated calls.
         """
+        # Normalize list params (MCP clients may send JSON strings)
+        geo_target_constants = ensure_list(geo_target_constants)
+
         # Convert string enum to proper enum type
         keyword_plan_network_enum = resolve_enum(
             KeywordPlanNetworkEnum.KeywordPlanNetwork,
@@ -461,6 +524,7 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network=keyword_plan_network_enum,
             include_adult_keywords=include_adult_keywords,
             page_size=page_size,
+            page_token=page_token,
         )
 
     async def generate_keyword_ideas_from_site(
@@ -472,8 +536,11 @@ def create_keyword_plan_idea_tools(
         keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
         include_adult_keywords: bool = False,
         page_size: int = 100,
-    ) -> List[Dict[str, Any]]:
-        """Generate keyword ideas from an entire website.
+        page_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generate keyword ideas from an entire website. Returns ONE page of results.
+
+        This API has a strict rate limit of 1 request per second. Do NOT call repeatedly in quick succession.
 
         Args:
             customer_id: The customer ID
@@ -483,10 +550,14 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network: Network type - UNSPECIFIED, GOOGLE_SEARCH, or GOOGLE_SEARCH_AND_PARTNERS
             include_adult_keywords: Whether to include adult keywords in results
             page_size: Number of results per page (max 10000)
+            page_token: Token from a previous response's next_page_token to fetch the next page. Wait at least 2 seconds between calls.
 
         Returns:
-            List of keyword ideas with metrics and annotations
+            Dict with results list and optional next_page_token for pagination. Wait at least 2 seconds between paginated calls.
         """
+        # Normalize list params (MCP clients may send JSON strings)
+        geo_target_constants = ensure_list(geo_target_constants)
+
         # Convert string enum to proper enum type
         keyword_plan_network_enum = resolve_enum(
             KeywordPlanNetworkEnum.KeywordPlanNetwork,
@@ -503,6 +574,7 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network=keyword_plan_network_enum,
             include_adult_keywords=include_adult_keywords,
             page_size=page_size,
+            page_token=page_token,
         )
 
     async def generate_keyword_ideas_from_keywords_and_url(
@@ -515,8 +587,11 @@ def create_keyword_plan_idea_tools(
         keyword_plan_network: str = "GOOGLE_SEARCH_AND_PARTNERS",
         include_adult_keywords: bool = False,
         page_size: int = 100,
-    ) -> List[Dict[str, Any]]:
-        """Generate keyword ideas from both keywords and a URL.
+        page_token: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generate keyword ideas from both keywords and a URL. Returns ONE page of results.
+
+        This API has a strict rate limit of 1 request per second. Do NOT call repeatedly in quick succession.
 
         Args:
             customer_id: The customer ID
@@ -527,10 +602,15 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network: Network type - UNSPECIFIED, GOOGLE_SEARCH, or GOOGLE_SEARCH_AND_PARTNERS
             include_adult_keywords: Whether to include adult keywords in results
             page_size: Number of results per page (max 10000)
+            page_token: Token from a previous response's next_page_token to fetch the next page. Wait at least 2 seconds between calls.
 
         Returns:
-            List of keyword ideas with metrics and annotations
+            Dict with results list and optional next_page_token for pagination. Wait at least 2 seconds between paginated calls.
         """
+        # Normalize list params (MCP clients may send JSON strings)
+        keywords = ensure_list(keywords)
+        geo_target_constants = ensure_list(geo_target_constants)
+
         # Convert string enum to proper enum type
         keyword_plan_network_enum = resolve_enum(
             KeywordPlanNetworkEnum.KeywordPlanNetwork,
@@ -548,6 +628,7 @@ def create_keyword_plan_idea_tools(
             keyword_plan_network=keyword_plan_network_enum,
             include_adult_keywords=include_adult_keywords,
             page_size=page_size,
+            page_token=page_token,
         )
 
     tools.extend(

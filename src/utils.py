@@ -1,8 +1,10 @@
+import json
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, TypeVar
+from typing import Any, Dict, List, TypeVar
 
+import grpc
 from google.ads.googleads.errors import GoogleAdsException
 from google.protobuf.json_format import MessageToDict
 
@@ -70,6 +72,51 @@ def resolve_enum(enum_class: Any, value: str, param_name: str = "parameter") -> 
     raise ValueError(
         f"Invalid {param_name} '{value}'. Valid values: {', '.join(valid)}"
     )
+
+
+def ensure_list(value: Any) -> List[str]:
+    """Normalize a value to a list of strings.
+
+    MCP clients may send array parameters as JSON-encoded strings
+    (e.g., '["a", "b"]') instead of actual arrays. This handles both cases.
+    """
+    if isinstance(value, list):
+        return value
+    if isinstance(value, str):
+        value = value.strip()
+        if value.startswith("["):
+            try:
+                parsed = json.loads(value)
+                if isinstance(parsed, list):
+                    return [str(item) for item in parsed]
+            except (json.JSONDecodeError, ValueError):
+                pass
+        # Single value — wrap in a list
+        return [value]
+    return list(value)
+
+
+def is_resource_exhausted(ex: Exception) -> bool:
+    """Check if an exception is a gRPC RESOURCE_EXHAUSTED error.
+
+    The Google Ads SDK interceptor intentionally does NOT wrap
+    RESOURCE_EXHAUSTED in GoogleAdsException — it raises a raw
+    grpc.RpcError so that api_core can retry it.  In our MCP layer
+    we catch it ourselves to give the LLM a clear "do not retry" signal.
+    """
+    if isinstance(ex, grpc.RpcError) and hasattr(ex, "code"):
+        try:
+            return ex.code() == grpc.StatusCode.RESOURCE_EXHAUSTED
+        except Exception:
+            pass
+    return False
+
+
+RATE_LIMIT_MSG = (
+    "RATE_LIMITED: Google Ads Planning API allows only 1 request per second "
+    "per customer ID. Do NOT retry this request immediately. "
+    "Wait at least 60 seconds before trying again."
+)
 
 
 def format_ads_error(ex: GoogleAdsException) -> str:

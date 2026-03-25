@@ -37,10 +37,16 @@ class GoogleAdsSdkClient:
             if path.is_file():
                 resolved = str(path.resolve())
                 logger.info("Google Ads config: YAML file %s", resolved)
-                return GoogleAdsClient.load_from_storage(resolved)
+                client = GoogleAdsClient.load_from_storage(resolved)
+                logger.info(
+                    "login_customer_id=%s", client.login_customer_id
+                )
+                return client
 
         logger.info("Google Ads config: environment (GOOGLE_ADS_*)")
-        return GoogleAdsClient.load_from_env()
+        client = GoogleAdsClient.load_from_env()
+        logger.info("login_customer_id=%s", client.login_customer_id)
+        return client
 
     @property
     def client(self) -> GoogleAdsClient:
