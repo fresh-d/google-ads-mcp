@@ -3,12 +3,12 @@
 from typing import Any, Dict, List, Optional, Callable, Awaitable
 
 from fastmcp import Context, FastMCP
-from google.ads.googleads.v20.services.services.data_link_service import (
+from google.ads.googleads.v23.services.services.data_link_service import (
     DataLinkServiceClient,
 )
 
-# Note: Data link types not fully available in v20 - simplified implementation
-# Note: Common data link types may not be available in v20
+# Note: Data link types not fully available in v23 - simplified implementation
+# Note: Common data link types may not be available in v23
 from google.ads.googleads.errors import GoogleAdsException
 
 from src.sdk_client import get_sdk_client
@@ -30,7 +30,7 @@ class DataLinkService:
         if self._client is None:
             sdk_client = get_sdk_client()
             self._client = sdk_client.client.get_service(
-                "DataLinkService", version="v20"
+                "DataLinkService", version="v23"
             )
         assert self._client is not None
         return self._client
@@ -43,7 +43,7 @@ class DataLinkService:
         data_link_type: str,
         external_id: str,
     ) -> Dict[str, Any]:
-        """Create a basic data link (simplified due to v20 limitations).
+        """Create a basic data link (simplified due to v23 limitations).
 
         Args:
             ctx: FastMCP context
@@ -58,7 +58,7 @@ class DataLinkService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Note: Complex data link types not available in v20 - simplified implementation
+            # Note: Complex data link types not available in v23 - simplified implementation
             await ctx.log(
                 level="info",
                 message=f"Data link creation requested: {data_link_name} ({data_link_type}) for {external_id}",
@@ -69,8 +69,8 @@ class DataLinkService:
                 "data_link_name": data_link_name,
                 "type": data_link_type,
                 "external_id": external_id,
-                "status": "Request processed - full data link creation requires additional v20 type support",
-                "note": "This is a simplified implementation due to v20 API limitations",
+                "status": "Request processed - full data link creation requires additional v23 type support",
+                "note": "This is a simplified implementation due to v23 API limitations",
             }
 
         except GoogleAdsException as e:
@@ -87,7 +87,7 @@ class DataLinkService:
         ctx: Context,
         customer_id: str,
     ) -> List[Dict[str, Any]]:
-        """List data links for a customer (simplified due to v20 limitations).
+        """List data links for a customer (simplified due to v23 limitations).
 
         Args:
             ctx: FastMCP context
@@ -99,7 +99,7 @@ class DataLinkService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Note: Complex data link queries not fully supported in v20
+            # Note: Complex data link queries not fully supported in v23
             await ctx.log(
                 level="info",
                 message=f"Data link list requested for customer {customer_id}",
@@ -108,8 +108,8 @@ class DataLinkService:
             return [
                 {
                     "customer_id": customer_id,
-                    "status": "Request processed - data link listing requires additional v20 type support",
-                    "note": "This is a simplified implementation due to v20 API limitations",
+                    "status": "Request processed - data link listing requires additional v23 type support",
+                    "note": "This is a simplified implementation due to v23 API limitations",
                 }
             ]
 
@@ -136,7 +136,7 @@ def create_data_link_tools(
         data_link_type: str,
         external_id: str,
     ) -> Dict[str, Any]:
-        """Create a basic data link (simplified due to v20 limitations).
+        """Create a basic data link (simplified due to v23 limitations).
 
         Args:
             customer_id: The customer ID
@@ -159,7 +159,7 @@ def create_data_link_tools(
         ctx: Context,
         customer_id: str,
     ) -> List[Dict[str, Any]]:
-        """List data links for a customer (simplified due to v20 limitations).
+        """List data links for a customer (simplified due to v23 limitations).
 
         Args:
             customer_id: The customer ID

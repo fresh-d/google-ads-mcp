@@ -127,10 +127,19 @@ def format_ads_error(ex: GoogleAdsException) -> str:
     ``request_id`` for debugging.
     """
     parts: list[str] = []
-    for error in ex.failure.errors:
-        parts.append(error.message or "Unknown error")
-    summary = "; ".join(parts) if parts else str(ex)
-    return f"Google Ads API error (request_id={ex.request_id}): {summary}"
+    failure = getattr(ex, "failure", None)
+    if failure is not None:
+        errors = getattr(failure, "errors", None)
+        if errors is not None:
+            try:
+                for err in errors:
+                    parts.append(getattr(err, "message", None) or "Unknown error")
+            except TypeError:
+                parts = []
+    summary = "; ".join(parts) if parts else (str(failure) if failure else str(ex))
+    rid = getattr(ex, "request_id", None)
+    suffix = f" (request_id={rid})" if rid else ""
+    return f"Google Ads API error: {summary}{suffix}"
 
 
 def serialize_proto_message(

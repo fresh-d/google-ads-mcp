@@ -5,13 +5,13 @@ from typing import Any
 
 import pytest
 from tests.google_ads_test_utils import make_google_ads_exception_stub
-from google.ads.googleads.v20.enums.types.response_content_type import (
+from google.ads.googleads.v23.enums.types.response_content_type import (
     ResponseContentTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.summary_row_setting import (
+from google.ads.googleads.v23.enums.types.summary_row_setting import (
     SummaryRowSettingEnum,
 )
-from google.ads.googleads.v20.services.types.google_ads_service import (
+from google.ads.googleads.v23.services.types.google_ads_service import (
     GoogleAdsRow,
     MutateGoogleAdsResponse,
     MutateOperation,
@@ -347,3 +347,42 @@ class TestGoogleAdsTools:
                 call_args["summary_row_setting"]
                 == SummaryRowSettingEnum.SummaryRowSetting.NO_SUMMARY_ROW
             )
+
+    async def test_atomic_mutate_tool_parses_shopping_campaign(self, mock_context: Any):
+        """atomic_mutate must parse campaign_operation JSON including shopping_setting."""
+        service = GoogleAdsService()
+        tools = create_google_ads_tools(service)
+        atomic_tool = tools[2]
+
+        with patch.object(service, "mutate") as mock_mutate:
+            mock_mutate.return_value = {"results": [], "partial_failure_error": None}  # type: ignore
+
+            await atomic_tool(
+                ctx=mock_context,
+                customer_id="1234567890",
+                operations=[
+                    {
+                        "campaign_operation": {
+                            "create": {
+                                "name": "Shopping MCP",
+                                "campaign_budget": "customers/1234567890/campaignBudgets/1",
+                                "advertising_channel_type": "SHOPPING",
+                                "status": "PAUSED",
+                                "manual_cpc": {},
+                                "contains_eu_political_advertising": "DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING",
+                                "shopping_setting": {
+                                    "merchant_id": 12345678,
+                                    "campaign_priority": 0,
+                                },
+                            }
+                        }
+                    }
+                ],
+            )
+
+        mock_mutate.assert_called_once()  # type: ignore
+        ops = mock_mutate.call_args[1]["operations"]  # type: ignore
+        assert len(ops) == 1
+        c = ops[0].campaign_operation.create
+        assert c.shopping_setting.merchant_id == 12345678
+        assert c.shopping_setting.campaign_priority == 0

@@ -1,19 +1,19 @@
-"""Google Ads service implementation with full v20 type safety."""
+"""Google Ads service implementation with full v23 type safety."""
 
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.enums.types.response_content_type import (
+from google.ads.googleads.v23.enums.types.response_content_type import (
     ResponseContentTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.summary_row_setting import (
+from google.ads.googleads.v23.enums.types.summary_row_setting import (
     SummaryRowSettingEnum,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.google_ads_service import (
+from google.ads.googleads.v23.services.types.google_ads_service import (
     GoogleAdsRow,
     MutateGoogleAdsRequest,
     MutateGoogleAdsResponse,
@@ -49,7 +49,7 @@ class GoogleAdsService:
         if self._client is None:
             sdk_client = get_sdk_client()
             self._client = sdk_client.client.get_service(
-                "GoogleAdsService", version="v20"
+                "GoogleAdsService", version="v23"
             )
         assert self._client is not None
         return self._client
@@ -394,6 +394,9 @@ def create_google_ads_tools(
         Returns:
             Dict with ``results`` list and optional ``partial_failure_error``
 
+        For Shopping campaigns in JSON, include ``shopping_setting`` with ``merchant_id``
+        and ``campaign_priority`` (0--2) inside ``campaign_operation.create``.
+
         Example -- create PMax campaign with asset group atomically:
             operations=[
                 {"campaign_budget_operation": {"create": {
@@ -427,7 +430,13 @@ def create_google_ads_tools(
         mutate_ops: list[MutateOperation] = []
         for op_dict in operations:
             mutate_op = MutateOperation()
-            ParseDict(op_dict, mutate_op._pb)
+            # ignore_unknown_fields: LLM payloads may include extra keys; also avoids
+            # brittle failures on proto evolution. Use snake_case keys matching the API.
+            ParseDict(
+                op_dict,
+                mutate_op._pb,
+                ignore_unknown_fields=True,
+            )
             mutate_ops.append(mutate_op)
 
         return await service.mutate(

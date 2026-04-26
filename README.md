@@ -4,7 +4,7 @@ An unofficial Model Context Protocol (MCP) server implementation for Google Ads 
 
 ## Overview
 
-This project provides an MCP server that wraps the Google Ads API v20, enabling Large Language Models (LLMs) to interact with Google Ads accounts through a standardized interface. The server uses the official Google Ads Python SDK with full type annotations for robust and reliable API interactions.
+This project provides an MCP server that wraps the Google Ads API v23, enabling Large Language Models (LLMs) to interact with Google Ads accounts through a standardized interface. The server uses the official Google Ads Python SDK with full type annotations for robust and reliable API interactions.
 
 ## Features
 
@@ -39,7 +39,7 @@ uv run main.py
 
 ## Feature Parity Table
 
-Below is a comprehensive table showing the implementation status of Google Ads API v20 services in this MCP server:
+Below is a comprehensive table showing the implementation status of Google Ads API v23 services in this MCP server:
 
 | Service Name                      | Category      | Implemented | Test Coverage | Notes                         |
 | --------------------------------- | ------------- | ----------- | ------------- | ----------------------------- |
@@ -149,14 +149,14 @@ Below is a comprehensive table showing the implementation status of Google Ads A
 
 ### Summary Statistics
 
-- **Total Services Implemented**: 89 out of ~120 Google Ads API v20 services
+- **Total Services Implemented**: 89 out of ~120 Google Ads API v23 services
 - **Services with Tests**: 72 (81% test coverage)
 - **Core Services Coverage**: 100% (all essential services implemented)
 - **Advanced Features Coverage**: High (most advanced features implemented)
 
 ### Implementation Highlights
 
-This MCP server provides comprehensive coverage of the Google Ads API v20:
+This MCP server provides comprehensive coverage of the Google Ads API v23:
 
 1. ✅ **Complete Core Services**: All essential campaign management services
 2. ✅ **Advanced Features**: Bulk operations, offline conversions, and data imports
@@ -174,7 +174,7 @@ This MCP server provides comprehensive coverage of the Google Ads API v20:
 
 ### Notable Services Not Yet Implemented
 
-While this MCP server has excellent coverage, some Google Ads API v20 services are not yet implemented:
+While this MCP server has excellent coverage, some Google Ads API v23 services are not yet implemented:
 
 - **SmartCampaignSettingService** & **SmartCampaignSuggestService**: Advanced Smart Campaign features
 - **RecommendationSubscriptionService**: Automated recommendation subscriptions

@@ -5,20 +5,20 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastmcp import Context
-from google.ads.googleads.v20.enums.types.advertising_channel_type import (
+from google.ads.googleads.v23.enums.types.advertising_channel_type import (
     AdvertisingChannelTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.campaign_experiment_type import (
+from google.ads.googleads.v23.enums.types.campaign_experiment_type import (
     CampaignExperimentTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.campaign_status import CampaignStatusEnum
-from google.ads.googleads.v20.enums.types.eu_political_advertising_status import (
+from google.ads.googleads.v23.enums.types.campaign_status import CampaignStatusEnum
+from google.ads.googleads.v23.enums.types.eu_political_advertising_status import (
     EuPoliticalAdvertisingStatusEnum,
 )
-from google.ads.googleads.v20.services.services.campaign_service import (
+from google.ads.googleads.v23.services.services.campaign_service import (
     CampaignServiceClient,
 )
-from google.ads.googleads.v20.services.types.campaign_service import (
+from google.ads.googleads.v23.services.types.campaign_service import (
     MutateCampaignsResponse,
 )
 
@@ -44,7 +44,7 @@ def campaign_service(mock_sdk_client: Any) -> CampaignService:
         return service
 
 
-def _mock_mutate(campaign_service: CampaignService) -> tuple[Mock, dict[str, Any]]:
+def _mock_mutate(campaign_service: CampaignService) -> tuple[Any, dict[str, Any]]:
     """Set up mock response for mutate_campaigns."""
     mock_response = Mock(spec=MutateCampaignsResponse)
     mock_result = Mock()
@@ -110,6 +110,61 @@ async def test_create_campaign(
     assert op.create.manual_cpc is not None
     # Network settings should be set for Search
     assert op.create.network_settings.target_google_search is True
+    assert op.create.network_settings.target_content_network is False
+
+
+@pytest.mark.asyncio
+async def test_create_shopping_campaign_requires_merchant(
+    campaign_service: CampaignService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Shopping campaigns require merchant_id."""
+    with pytest.raises(Exception, match="merchant_id is required"):
+        await campaign_service.create_campaign(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            name="Shopping",
+            budget_resource_name="customers/1234567890/campaignBudgets/987654321",
+            advertising_channel_type=AdvertisingChannelTypeEnum.AdvertisingChannelType.SHOPPING,
+        )
+
+
+@pytest.mark.asyncio
+async def test_create_shopping_campaign_sets_merchant_and_network(
+    campaign_service: CampaignService,
+    mock_sdk_client: Any,
+    mock_ctx: Context,
+) -> None:
+    """Shopping sets shopping_setting and does not enable Display Network."""
+    mock_client, expected = _mock_mutate(campaign_service)
+
+    with patch(
+        "src.services.campaign.campaign_service.serialize_proto_message",
+        return_value=expected,
+    ):
+        result = await campaign_service.create_campaign(
+            ctx=mock_ctx,
+            customer_id="1234567890",
+            name="Shopping US",
+            budget_resource_name="customers/1234567890/campaignBudgets/987654321",
+            advertising_channel_type=AdvertisingChannelTypeEnum.AdvertisingChannelType.SHOPPING,
+            merchant_id=12345678,
+            shopping_campaign_priority=1,
+            shopping_feed_label="US",
+        )
+
+    assert result == expected
+    request = mock_client.mutate_campaigns.call_args[1]["request"]  # type: ignore
+    op = request.operations[0]
+    assert (
+        op.create.advertising_channel_type
+        == AdvertisingChannelTypeEnum.AdvertisingChannelType.SHOPPING
+    )
+    assert op.create.network_settings.target_content_network is False
+    assert op.create.shopping_setting.merchant_id == 12345678
+    assert op.create.shopping_setting.campaign_priority == 1
+    assert op.create.shopping_setting.feed_label == "US"
 
 
 @pytest.mark.asyncio
@@ -139,8 +194,8 @@ async def test_create_campaign_with_dates(
     assert result == expected
     request = mock_client.mutate_campaigns.call_args[1]["request"]  # type: ignore
     op = request.operations[0]
-    assert op.create.start_date == "20240301"
-    assert op.create.end_date == "20240331"
+    assert op.create.start_date_time == "2024-03-01 00:00:00"
+    assert op.create.end_date_time == "2024-03-31 23:59:59"
 
 
 @pytest.mark.asyncio
@@ -369,9 +424,9 @@ async def test_update_campaign_dates_only(
     assert result == expected
     request = mock_client.mutate_campaigns.call_args[1]["request"]  # type: ignore
     op = request.operations[0]
-    assert op.update.start_date == "20240401"
-    assert op.update.end_date == "20240430"
-    assert set(op.update_mask.paths) == {"start_date", "end_date"}
+    assert op.update.start_date_time == "2024-04-01 00:00:00"
+    assert op.update.end_date_time == "2024-04-30 23:59:59"
+    assert set(op.update_mask.paths) == {"start_date_time", "end_date_time"}
 
 
 @pytest.mark.asyncio

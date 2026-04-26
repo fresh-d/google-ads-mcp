@@ -4,7 +4,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types.bidding import (
+from google.ads.googleads.v23.common.types.bidding import (
     ManualCpc,
     MaximizeConversions,
     MaximizeConversionValue,
@@ -13,24 +13,24 @@ from google.ads.googleads.v20.common.types.bidding import (
     TargetRoas,
     TargetSpend,
 )
-from google.ads.googleads.v20.enums.types.advertising_channel_sub_type import (
+from google.ads.googleads.v23.enums.types.advertising_channel_sub_type import (
     AdvertisingChannelSubTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.advertising_channel_type import (
+from google.ads.googleads.v23.enums.types.advertising_channel_type import (
     AdvertisingChannelTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.campaign_experiment_type import (
+from google.ads.googleads.v23.enums.types.campaign_experiment_type import (
     CampaignExperimentTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.campaign_status import CampaignStatusEnum
-from google.ads.googleads.v20.enums.types.eu_political_advertising_status import (
+from google.ads.googleads.v23.enums.types.campaign_status import CampaignStatusEnum
+from google.ads.googleads.v23.enums.types.eu_political_advertising_status import (
     EuPoliticalAdvertisingStatusEnum,
 )
-from google.ads.googleads.v20.resources.types.campaign import Campaign
-from google.ads.googleads.v20.services.services.campaign_service import (
+from google.ads.googleads.v23.resources.types.campaign import Campaign
+from google.ads.googleads.v23.services.services.campaign_service import (
     CampaignServiceClient,
 )
-from google.ads.googleads.v20.services.types.campaign_service import (
+from google.ads.googleads.v23.services.types.campaign_service import (
     CampaignOperation,
     MutateCampaignsRequest,
     MutateCampaignsResponse,
@@ -49,6 +49,17 @@ from src.utils import (
 logger = get_logger(__name__)
 
 _PMAX = AdvertisingChannelTypeEnum.AdvertisingChannelType.PERFORMANCE_MAX
+_SHOPPING = AdvertisingChannelTypeEnum.AdvertisingChannelType.SHOPPING
+
+
+def _date_param_to_start_date_time(yyyy_mm_dd: str) -> str:
+    """API v23+ uses start_date_time (yyyy-MM-dd HH:mm:ss) instead of start_date."""
+    return f"{yyyy_mm_dd} 00:00:00"
+
+
+def _date_param_to_end_date_time(yyyy_mm_dd: str) -> str:
+    """API v23+ uses end_date_time (yyyy-MM-dd HH:mm:ss) instead of end_date."""
+    return f"{yyyy_mm_dd} 23:59:59"
 
 
 def _apply_bidding_strategy(
@@ -117,7 +128,7 @@ class CampaignService:
         if self._client is None:
             sdk_client = get_sdk_client()
             self._client = sdk_client.client.get_service(
-                "CampaignService", version="v20"
+                "CampaignService", version="v23"
             )
         assert self._client is not None
         return self._client
@@ -141,6 +152,9 @@ class CampaignService:
         target_spend_cpc_bid_ceiling_micros: Optional[int] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        merchant_id: Optional[int] = None,
+        shopping_campaign_priority: Optional[int] = None,
+        shopping_feed_label: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new campaign.
 
@@ -162,6 +176,9 @@ class CampaignService:
             target_spend_cpc_bid_ceiling_micros: CPC ceiling (for TARGET_SPEND)
             start_date: Campaign start date (YYYY-MM-DD)
             end_date: Campaign end date (YYYY-MM-DD)
+            merchant_id: Merchant Center account ID (required for SHOPPING)
+            shopping_campaign_priority: Shopping priority 0–2 (default 0 for standard Shopping)
+            shopping_feed_label: Optional Merchant Center feed label for the campaign
 
         Returns:
             Created campaign details
@@ -183,15 +200,34 @@ class CampaignService:
                 CampaignExperimentTypeEnum.CampaignExperimentType.BASE
             )
 
-            # Network settings only apply to non-PMax campaigns
+            # Network settings only apply to non-PMax campaigns.
+            # Shopping must not use the Display Network; the API rejects target_content_network for Shopping.
             if advertising_channel_type != _PMAX:
-                campaign.network_settings.target_google_search = True
-                campaign.network_settings.target_search_network = True
-                campaign.network_settings.target_content_network = (
-                    advertising_channel_type
-                    != AdvertisingChannelTypeEnum.AdvertisingChannelType.SEARCH
+                ns = campaign.network_settings
+                ns.target_google_search = True
+                ns.target_search_network = True
+                ns.target_partner_search_network = False
+                if advertising_channel_type == _SHOPPING:
+                    ns.target_content_network = False
+                else:
+                    ns.target_content_network = (
+                        advertising_channel_type
+                        != AdvertisingChannelTypeEnum.AdvertisingChannelType.SEARCH
+                    )
+
+            if advertising_channel_type == _SHOPPING:
+                if merchant_id is None:
+                    raise ValueError(
+                        "merchant_id is required for SHOPPING campaigns (Google Merchant Center ID)"
+                    )
+                campaign.shopping_setting.merchant_id = merchant_id
+                campaign.shopping_setting.campaign_priority = (
+                    0
+                    if shopping_campaign_priority is None
+                    else shopping_campaign_priority
                 )
-                campaign.network_settings.target_partner_search_network = False
+                if shopping_feed_label:
+                    campaign.shopping_setting.feed_label = shopping_feed_label
 
             _apply_bidding_strategy(
                 campaign,
@@ -204,9 +240,9 @@ class CampaignService:
             )
 
             if start_date:
-                campaign.start_date = start_date.replace("-", "")
+                campaign.start_date_time = _date_param_to_start_date_time(start_date)
             if end_date:
-                campaign.end_date = end_date.replace("-", "")
+                campaign.end_date_time = _date_param_to_end_date_time(end_date)
 
             operation = CampaignOperation()
             operation.create = campaign
@@ -283,12 +319,12 @@ class CampaignService:
                 update_mask_fields.append("status")
 
             if start_date is not None:
-                campaign.start_date = start_date.replace("-", "")
-                update_mask_fields.append("start_date")
+                campaign.start_date_time = _date_param_to_start_date_time(start_date)
+                update_mask_fields.append("start_date_time")
 
             if end_date is not None:
-                campaign.end_date = end_date.replace("-", "")
-                update_mask_fields.append("end_date")
+                campaign.end_date_time = _date_param_to_end_date_time(end_date)
+                update_mask_fields.append("end_date_time")
 
             if bidding_strategy_type is not None:
                 bst = bidding_strategy_type.upper()
@@ -370,6 +406,9 @@ def create_campaign_tools(
         target_spend_cpc_bid_ceiling_micros: Optional[int] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        merchant_id: Optional[int] = None,
+        shopping_campaign_priority: Optional[int] = None,
+        shopping_feed_label: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Create a new campaign. Supports Search, Display, Shopping, Video, and Performance Max.
 
@@ -391,6 +430,9 @@ def create_campaign_tools(
             target_spend_cpc_bid_ceiling_micros: Max CPC ceiling in micros (for TARGET_SPEND)
             start_date: Campaign start date (YYYY-MM-DD)
             end_date: Campaign end date (YYYY-MM-DD)
+            merchant_id: Google Merchant Center ID (required when advertising_channel_type is SHOPPING)
+            shopping_campaign_priority: Shopping campaign priority 0-2 (defaults to 0)
+            shopping_feed_label: Optional Merchant Center feed label
 
         Returns:
             Created campaign details with resource_name and campaign_id
@@ -426,6 +468,9 @@ def create_campaign_tools(
             target_spend_cpc_bid_ceiling_micros=target_spend_cpc_bid_ceiling_micros,
             start_date=start_date,
             end_date=end_date,
+            merchant_id=merchant_id,
+            shopping_campaign_priority=shopping_campaign_priority,
+            shopping_feed_label=shopping_feed_label,
         )
 
     async def update_campaign(
