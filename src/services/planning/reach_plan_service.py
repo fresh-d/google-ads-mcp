@@ -4,10 +4,10 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.services.services.reach_plan_service import (
+from google.ads.googleads.v23.services.services.reach_plan_service import (
     ReachPlanServiceClient,
 )
-from google.ads.googleads.v20.services.types.reach_plan_service import (
+from google.ads.googleads.v23.services.types.reach_plan_service import (
     ListPlannableLocationsRequest,
     ListPlannableLocationsResponse,
     ListPlannableProductsRequest,
@@ -38,7 +38,7 @@ class ReachPlanService:
         if self._client is None:
             sdk_client = get_sdk_client()
             self._client = sdk_client.client.get_service(
-                "ReachPlanService", version="v20"
+                "ReachPlanService", version="v23"
             )
         assert self._client is not None
         return self._client
@@ -162,7 +162,7 @@ class ReachPlanService:
         currency_code: str,
         budget_micros: int,
     ) -> Dict[str, Any]:
-        """Generate a basic reach forecast (simplified version due to v20 limitations).
+        """Generate a basic reach forecast (simplified version due to v23 limitations).
 
         Args:
             ctx: FastMCP context
@@ -177,7 +177,7 @@ class ReachPlanService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Note: GenerateReachForecastRequest requires complex types not available in v20
+            # Note: GenerateReachForecastRequest requires complex types not available in v23
             # This is a simplified implementation that returns basic information
             raise NotImplementedError
 
@@ -235,7 +235,7 @@ def create_reach_plan_tools(
         currency_code: str,
         budget_micros: int,
     ) -> Dict[str, Any]:
-        """Generate a basic reach forecast (simplified due to v20 limitations).
+        """Generate a basic reach forecast (simplified due to v23 limitations).
 
         Args:
             customer_id: The customer ID (can be with or without hyphens)

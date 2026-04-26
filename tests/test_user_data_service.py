@@ -5,10 +5,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastmcp import Context
-from google.ads.googleads.v20.services.services.user_data_service import (
+from google.ads.googleads.v23.services.services.user_data_service import (
     UserDataServiceClient,
 )
-from google.ads.googleads.v20.services.types.user_data_service import (
+from google.ads.googleads.v23.services.types.user_data_service import (
     UploadUserDataResponse,
 )
 
@@ -306,7 +306,7 @@ async def test_upload_store_sales_data(
     assert request.customer_id == customer_id
     assert len(request.operations) == 2
 
-    # Note: store_sales_metadata is not available in v20 API
+    # Note: store_sales_metadata is not available in v23 API
     # Store sales are identified by store_code in transaction_attribute
 
     # Check first operation

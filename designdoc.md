@@ -3,9 +3,9 @@ Business Model: Demarka is a B2B SaaS platform for trademark search and monitori
 
 Tool Access/Use: Our tool will be used internally by our marketing team to manage and optimize Google Ads campaigns. The tool is an AI assistant (Claude via MCP) that allows our team to create campaigns, manage ad groups, adjust bids, and pull performance reports through natural language commands. Third parties do not receive Google Ads credentials or direct API access; natural-language processing may be performed by our AI provider under our configuration. All Google Ads operations target our own customer account(s) only.
 
-Tool Design: The tool connects Claude AI to the Google Ads API via Model Context Protocol (MCP). Our marketing team interacts with Claude in natural language to perform campaign operations. Claude translates these requests into Google Ads API v20 calls through the official Python client. The MCP server exposes tools that map to the API services listed below.
+Tool Design: The tool connects Claude AI to the Google Ads API via Model Context Protocol (MCP). Our marketing team interacts with Claude in natural language to perform campaign operations. Claude translates these requests into Google Ads API v23 calls through the official Python client. The MCP server exposes tools that map to the API services listed below.
 
-API Services Called (Google Ads API v20):
+API Services Called (Google Ads API v23):
 
 The MCP implementation may invoke any of the following gRPC services, depending on the task (including GAQL search/stream via GoogleAdsService and field metadata via GoogleAdsFieldService):
 

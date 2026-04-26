@@ -38,9 +38,7 @@ class GoogleAdsSdkClient:
                 resolved = str(path.resolve())
                 logger.info("Google Ads config: YAML file %s", resolved)
                 client = GoogleAdsClient.load_from_storage(resolved)
-                logger.info(
-                    "login_customer_id=%s", client.login_customer_id
-                )
+                logger.info("login_customer_id=%s", client.login_customer_id)
                 return client
 
         logger.info("Google Ads config: environment (GOOGLE_ADS_*)")
@@ -63,7 +61,7 @@ class GoogleAdsSdkClient:
         proves that the OAuth / service-account token is valid.
         """
         try:
-            customer_service = self.client.get_service("CustomerService", version="v20")
+            customer_service = self.client.get_service("CustomerService", version="v23")
             customer_service.list_accessible_customers()
             logger.info("Credential validation passed")
         except Exception:

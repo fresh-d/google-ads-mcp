@@ -5,13 +5,13 @@ from typing import Any
 
 import pytest
 from tests.google_ads_test_utils import make_google_ads_exception_stub
-from google.ads.googleads.v20.enums.types.conversion_action_category import (
+from google.ads.googleads.v23.enums.types.conversion_action_category import (
     ConversionActionCategoryEnum,
 )
-from google.ads.googleads.v20.enums.types.conversion_origin import (
+from google.ads.googleads.v23.enums.types.conversion_origin import (
     ConversionOriginEnum,
 )
-from google.ads.googleads.v20.services.types.campaign_conversion_goal_service import (
+from google.ads.googleads.v23.services.types.campaign_conversion_goal_service import (
     MutateCampaignConversionGoalsResponse,
     MutateCampaignConversionGoalResult,
 )
@@ -249,7 +249,7 @@ class TestCampaignConversionGoalTools:
         with patch.object(service, "update_campaign_conversion_goal") as mock_update:
             mock_update.return_value = {"results": [{"resource_name": "test"}]}  # type: ignore
 
-            # Test with IMPORTED_LEAD / APP (v20 has no plain LEAD category)
+            # Test with IMPORTED_LEAD / APP (v23 has no plain LEAD category)
             await update_tool(
                 ctx=mock_context,
                 customer_id="1234567890",
