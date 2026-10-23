@@ -4,26 +4,26 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.enums.types.account_link_status import (
+from google.ads.googleads.v26.enums.types.account_link_status import (
     AccountLinkStatusEnum,
 )
-from google.ads.googleads.v20.enums.types.linked_account_type import (
+from google.ads.googleads.v26.enums.types.linked_account_type import (
     LinkedAccountTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.mobile_app_vendor import (
+from google.ads.googleads.v26.enums.types.mobile_app_vendor import (
     MobileAppVendorEnum,
 )
-from google.ads.googleads.v20.resources.types.account_link import (
+from google.ads.googleads.v26.resources.types.account_link import (
     AccountLink,
     ThirdPartyAppAnalyticsLinkIdentifier,
 )
-from google.ads.googleads.v20.services.services.account_link_service import (
+from google.ads.googleads.v26.services.services.account_link_service import (
     AccountLinkServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.account_link_service import (
+from google.ads.googleads.v26.services.types.account_link_service import (
     AccountLinkOperation,
     CreateAccountLinkRequest,
     CreateAccountLinkResponse,
@@ -55,9 +55,7 @@ class AccountLinkService:
         """Get the account link service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "AccountLinkService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("AccountLinkService")
         assert self._client is not None
         return self._client
 

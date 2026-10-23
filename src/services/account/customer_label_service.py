@@ -1,14 +1,14 @@
-"""Customer Label service implementation with full v20 type safety."""
+"""Customer Label service implementation with full v26 type safety."""
 
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.resources.types.customer_label import CustomerLabel
-from google.ads.googleads.v20.services.services.customer_label_service import (
+from google.ads.googleads.v26.resources.types.customer_label import CustomerLabel
+from google.ads.googleads.v26.services.services.customer_label_service import (
     CustomerLabelServiceClient,
 )
-from google.ads.googleads.v20.services.types.customer_label_service import (
+from google.ads.googleads.v26.services.types.customer_label_service import (
     CustomerLabelOperation,
     MutateCustomerLabelsRequest,
     MutateCustomerLabelsResponse,
@@ -42,9 +42,7 @@ class CustomerLabelService:
         """Get the customer label service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "CustomerLabelService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("CustomerLabelService")
         assert self._client is not None
         return self._client
 

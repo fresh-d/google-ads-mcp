@@ -3,10 +3,10 @@
 from typing import Any, Dict, List, Optional, Callable, Awaitable
 
 from fastmcp import Context, FastMCP
-from google.ads.googleads.v20.services.services.payments_account_service import (
+from google.ads.googleads.v26.services.services.payments_account_service import (
     PaymentsAccountServiceClient,
 )
-from google.ads.googleads.v20.services.types.payments_account_service import (
+from google.ads.googleads.v26.services.types.payments_account_service import (
     ListPaymentsAccountsRequest,
     ListPaymentsAccountsResponse,
 )
@@ -30,9 +30,7 @@ class PaymentsAccountService:
         """Get the payments account service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "PaymentsAccountService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("PaymentsAccountService")
         assert self._client is not None
         return self._client
 

@@ -4,10 +4,10 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.google_ads_service import (
+from google.ads.googleads.v26.services.types.google_ads_service import (
     GoogleAdsRow,
     SearchGoogleAdsRequest,
 )
@@ -35,9 +35,7 @@ class SearchService:
         """Get the Google Ads service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "GoogleAdsService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("GoogleAdsService")
         assert self._client is not None
         return self._client
 
@@ -71,8 +69,8 @@ class SearchService:
                     campaign.advertising_channel_type,
                     campaign.campaign_budget,
                     campaign_budget.amount_micros,
-                    campaign.start_date,
-                    campaign.end_date
+                    campaign.start_date_time,
+                    campaign.end_date_time
                 FROM campaign
             """
 

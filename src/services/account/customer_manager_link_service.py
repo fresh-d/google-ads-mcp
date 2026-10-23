@@ -1,19 +1,19 @@
-"""Customer Manager Link service implementation with full v20 type safety."""
+"""Customer Manager Link service implementation with full v26 type safety."""
 
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.enums.types.manager_link_status import (
+from google.ads.googleads.v26.enums.types.manager_link_status import (
     ManagerLinkStatusEnum,
 )
-from google.ads.googleads.v20.resources.types.customer_manager_link import (
+from google.ads.googleads.v26.resources.types.customer_manager_link import (
     CustomerManagerLink,
 )
-from google.ads.googleads.v20.services.services.customer_manager_link_service import (
+from google.ads.googleads.v26.services.services.customer_manager_link_service import (
     CustomerManagerLinkServiceClient,
 )
-from google.ads.googleads.v20.services.types.customer_manager_link_service import (
+from google.ads.googleads.v26.services.types.customer_manager_link_service import (
     CustomerManagerLinkOperation,
     MoveManagerLinkRequest,
     MoveManagerLinkResponse,
@@ -45,9 +45,7 @@ class CustomerManagerLinkService:
         """Get the customer manager link service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "CustomerManagerLinkService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("CustomerManagerLinkService")
         assert self._client is not None
         return self._client
 

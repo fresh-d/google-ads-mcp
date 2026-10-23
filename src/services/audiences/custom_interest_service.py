@@ -4,26 +4,26 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.enums.types.custom_interest_member_type import (
+from google.ads.googleads.v26.enums.types.custom_interest_member_type import (
     CustomInterestMemberTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.custom_interest_status import (
+from google.ads.googleads.v26.enums.types.custom_interest_status import (
     CustomInterestStatusEnum,
 )
-from google.ads.googleads.v20.enums.types.custom_interest_type import (
+from google.ads.googleads.v26.enums.types.custom_interest_type import (
     CustomInterestTypeEnum,
 )
-from google.ads.googleads.v20.resources.types.custom_interest import (
+from google.ads.googleads.v26.resources.types.custom_interest import (
     CustomInterest,
     CustomInterestMember,
 )
-from google.ads.googleads.v20.services.services.custom_interest_service import (
+from google.ads.googleads.v26.services.services.custom_interest_service import (
     CustomInterestServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.custom_interest_service import (
+from google.ads.googleads.v26.services.types.custom_interest_service import (
     CustomInterestOperation,
     MutateCustomInterestsRequest,
     MutateCustomInterestsResponse,
@@ -54,9 +54,7 @@ class CustomInterestService:
         """Get the custom interest service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "CustomInterestService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("CustomInterestService")
         assert self._client is not None
         return self._client
 

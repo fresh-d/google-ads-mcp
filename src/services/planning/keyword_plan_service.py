@@ -4,23 +4,23 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.enums.types.keyword_plan_forecast_interval import (
+from google.ads.googleads.v26.enums.types.keyword_plan_forecast_interval import (
     KeywordPlanForecastIntervalEnum,
 )
-from google.ads.googleads.v20.resources.types.keyword_plan import KeywordPlan
-from google.ads.googleads.v20.services.services.keyword_plan_service import (
+from google.ads.googleads.v26.resources.types.keyword_plan import KeywordPlan
+from google.ads.googleads.v26.services.services.keyword_plan_service import (
     KeywordPlanServiceClient,
 )
-from google.ads.googleads.v20.services.services.keyword_plan_idea_service import (
+from google.ads.googleads.v26.services.services.keyword_plan_idea_service import (
     KeywordPlanIdeaServiceClient,
 )
-from google.ads.googleads.v20.services.services.keyword_plan_campaign_service import (
+from google.ads.googleads.v26.services.services.keyword_plan_campaign_service import (
     KeywordPlanCampaignServiceClient,
 )
-from google.ads.googleads.v20.services.services.keyword_plan_ad_group_keyword_service import (
+from google.ads.googleads.v26.services.services.keyword_plan_ad_group_keyword_service import (
     KeywordPlanAdGroupKeywordServiceClient,
 )
-from google.ads.googleads.v20.services.types.keyword_plan_service import (
+from google.ads.googleads.v26.services.types.keyword_plan_service import (
     KeywordPlanOperation,
     MutateKeywordPlansRequest,
     MutateKeywordPlansResponse,
@@ -51,9 +51,7 @@ class KeywordPlanService:
         """Get the keyword plan service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "KeywordPlanService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("KeywordPlanService")
         assert self._client is not None
         return self._client
 
@@ -159,7 +157,7 @@ class KeywordPlanService:
                 "KeywordPlanIdeaService"
             )
 
-            from google.ads.googleads.v20.services.types.keyword_plan_idea_service import (
+            from google.ads.googleads.v26.services.types.keyword_plan_idea_service import (
                 GenerateKeywordIdeasRequest,
             )
 
@@ -240,16 +238,14 @@ class KeywordPlanService:
             # Use KeywordPlanCampaignService
             sdk_client = get_sdk_client()
             campaign_service: KeywordPlanCampaignServiceClient = (
-                sdk_client.client.get_service(
-                    "KeywordPlanCampaignService", version="v20"
-                )
+                sdk_client.client.get_service("KeywordPlanCampaignService")
             )
 
-            from google.ads.googleads.v20.resources.types.keyword_plan_campaign import (
+            from google.ads.googleads.v26.resources.types.keyword_plan_campaign import (
                 KeywordPlanCampaign,
                 KeywordPlanGeoTarget,
             )
-            from google.ads.googleads.v20.services.types.keyword_plan_campaign_service import (
+            from google.ads.googleads.v26.services.types.keyword_plan_campaign_service import (
                 KeywordPlanCampaignOperation,
                 MutateKeywordPlanCampaignsRequest,
             )
@@ -330,18 +326,16 @@ class KeywordPlanService:
             # Use KeywordPlanAdGroupKeywordService
             sdk_client = get_sdk_client()
             keyword_service: KeywordPlanAdGroupKeywordServiceClient = (
-                sdk_client.client.get_service(
-                    "KeywordPlanAdGroupKeywordService", version="v20"
-                )
+                sdk_client.client.get_service("KeywordPlanAdGroupKeywordService")
             )
 
-            from google.ads.googleads.v20.enums.types.keyword_match_type import (
+            from google.ads.googleads.v26.enums.types.keyword_match_type import (
                 KeywordMatchTypeEnum,
             )
-            from google.ads.googleads.v20.resources.types.keyword_plan_ad_group_keyword import (
+            from google.ads.googleads.v26.resources.types.keyword_plan_ad_group_keyword import (
                 KeywordPlanAdGroupKeyword,
             )
-            from google.ads.googleads.v20.services.types.keyword_plan_ad_group_keyword_service import (
+            from google.ads.googleads.v26.services.types.keyword_plan_ad_group_keyword_service import (
                 KeywordPlanAdGroupKeywordOperation,
                 MutateKeywordPlanAdGroupKeywordsRequest,
             )

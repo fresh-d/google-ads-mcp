@@ -1,6 +1,6 @@
 """Campaign bid modifier service implementation using Google Ads SDK.
 
-Note: In Google Ads API v20, bid modifiers for most criteria (device, location,
+Note: In Google Ads API v26, bid modifiers for most criteria (device, location,
 demographics, etc.) are managed through CampaignCriterion with the bid_modifier field.
 CampaignBidModifier is specifically for interaction type bid modifiers.
 """
@@ -9,18 +9,18 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types.criteria import InteractionTypeInfo
-from google.ads.googleads.v20.enums.types.interaction_type import InteractionTypeEnum
-from google.ads.googleads.v20.resources.types.campaign_bid_modifier import (
+from google.ads.googleads.v26.common.types.criteria import InteractionTypeInfo
+from google.ads.googleads.v26.enums.types.interaction_type import InteractionTypeEnum
+from google.ads.googleads.v26.resources.types.campaign_bid_modifier import (
     CampaignBidModifier,
 )
-from google.ads.googleads.v20.services.services.campaign_bid_modifier_service import (
+from google.ads.googleads.v26.services.services.campaign_bid_modifier_service import (
     CampaignBidModifierServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.campaign_bid_modifier_service import (
+from google.ads.googleads.v26.services.types.campaign_bid_modifier_service import (
     CampaignBidModifierOperation,
     MutateCampaignBidModifiersRequest,
     MutateCampaignBidModifiersResponse,
@@ -55,9 +55,7 @@ class CampaignBidModifierService:
         """Get the campaign bid modifier service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "CampaignBidModifierService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("CampaignBidModifierService")
         assert self._client is not None
         return self._client
 

@@ -4,24 +4,24 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types.offline_user_data import (
+from google.ads.googleads.v26.common.types.offline_user_data import (
     OfflineUserAddressInfo,
     UserData,
     UserIdentifier,
 )
-from google.ads.googleads.v20.enums.types.offline_user_data_job_type import (
+from google.ads.googleads.v26.enums.types.offline_user_data_job_type import (
     OfflineUserDataJobTypeEnum,
 )
-from google.ads.googleads.v20.resources.types.offline_user_data_job import (
+from google.ads.googleads.v26.resources.types.offline_user_data_job import (
     OfflineUserDataJob,
 )
-from google.ads.googleads.v20.services.services.offline_user_data_job_service import (
+from google.ads.googleads.v26.services.services.offline_user_data_job_service import (
     OfflineUserDataJobServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.offline_user_data_job_service import (
+from google.ads.googleads.v26.services.types.offline_user_data_job_service import (
     AddOfflineUserDataJobOperationsRequest,
     AddOfflineUserDataJobOperationsResponse,
     CreateOfflineUserDataJobRequest,
@@ -53,9 +53,7 @@ class OfflineUserDataJobService:
         """Get the offline user data job service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "OfflineUserDataJobService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("OfflineUserDataJobService")
         assert self._client is not None
         return self._client
 
@@ -198,7 +196,7 @@ class OfflineUserDataJobService:
                         trans_attr.get("transaction_date_time")
                     )
 
-                # Note: OfflineUserData not available in v20 - simplified implementation
+                # Note: OfflineUserData not available in v26 - simplified implementation
                 # operation.create = user_data  # Simplified approach
                 operation.create = user_data
                 operations.append(operation)

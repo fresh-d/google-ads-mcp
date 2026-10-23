@@ -4,23 +4,23 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.enums.types.account_budget_proposal_type import (
+from google.ads.googleads.v26.enums.types.account_budget_proposal_type import (
     AccountBudgetProposalTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.spending_limit_type import (
+from google.ads.googleads.v26.enums.types.spending_limit_type import (
     SpendingLimitTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.time_type import TimeTypeEnum
-from google.ads.googleads.v20.resources.types.account_budget_proposal import (
+from google.ads.googleads.v26.enums.types.time_type import TimeTypeEnum
+from google.ads.googleads.v26.resources.types.account_budget_proposal import (
     AccountBudgetProposal,
 )
-from google.ads.googleads.v20.services.services.account_budget_proposal_service import (
+from google.ads.googleads.v26.services.services.account_budget_proposal_service import (
     AccountBudgetProposalServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.account_budget_proposal_service import (
+from google.ads.googleads.v26.services.types.account_budget_proposal_service import (
     AccountBudgetProposalOperation,
     MutateAccountBudgetProposalRequest,
     MutateAccountBudgetProposalResponse,
@@ -50,9 +50,7 @@ class AccountBudgetProposalService:
         """Get the account budget proposal service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "AccountBudgetProposalService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("AccountBudgetProposalService")
         assert self._client is not None
         return self._client
 

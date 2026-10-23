@@ -3,20 +3,20 @@
 from typing import Any, Dict, List, Optional, Callable, Awaitable
 
 from fastmcp import Context, FastMCP
-from google.ads.googleads.v20.services.services.ad_group_ad_label_service import (
+from google.ads.googleads.v26.services.services.ad_group_ad_label_service import (
     AdGroupAdLabelServiceClient,
 )
-from google.ads.googleads.v20.services.types.ad_group_ad_label_service import (
+from google.ads.googleads.v26.services.types.ad_group_ad_label_service import (
     MutateAdGroupAdLabelsRequest,
     MutateAdGroupAdLabelsResponse,
     AdGroupAdLabelOperation,
 )
-from google.ads.googleads.v20.resources.types.ad_group_ad_label import (
+from google.ads.googleads.v26.resources.types.ad_group_ad_label import (
     AdGroupAdLabel,
 )
 from google.ads.googleads.errors import GoogleAdsException
 
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
 
@@ -43,9 +43,7 @@ class AdGroupAdLabelService:
         """Get the ad group ad label service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "AdGroupAdLabelService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("AdGroupAdLabelService")
         assert self._client is not None
         return self._client
 

@@ -1,16 +1,16 @@
-"""Asset Group Asset service implementation with full v20 type safety."""
+"""Asset Group Asset service implementation with full v26 type safety."""
 
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.enums.types.asset_field_type import AssetFieldTypeEnum
-from google.ads.googleads.v20.enums.types.asset_link_status import AssetLinkStatusEnum
-from google.ads.googleads.v20.resources.types.asset_group_asset import AssetGroupAsset
-from google.ads.googleads.v20.services.services.asset_group_asset_service import (
+from google.ads.googleads.v26.enums.types.asset_field_type import AssetFieldTypeEnum
+from google.ads.googleads.v26.enums.types.asset_link_status import AssetLinkStatusEnum
+from google.ads.googleads.v26.resources.types.asset_group_asset import AssetGroupAsset
+from google.ads.googleads.v26.services.services.asset_group_asset_service import (
     AssetGroupAssetServiceClient,
 )
-from google.ads.googleads.v20.services.types.asset_group_asset_service import (
+from google.ads.googleads.v26.services.types.asset_group_asset_service import (
     AssetGroupAssetOperation,
     MutateAssetGroupAssetsRequest,
     MutateAssetGroupAssetsResponse,
@@ -45,9 +45,7 @@ class AssetGroupAssetService:
         """Get the asset group asset service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "AssetGroupAssetService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("AssetGroupAssetService")
         assert self._client is not None
         return self._client
 

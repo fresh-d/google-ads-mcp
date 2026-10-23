@@ -1,4 +1,4 @@
-"""Asset Group Signal Service for Google Ads API v20.
+"""Asset Group Signal Service for Google Ads API v26.
 
 This service manages audience and search theme signals for Performance Max asset groups.
 Signals help Performance Max campaigns identify users most likely to convert.
@@ -7,20 +7,20 @@ Signals help Performance Max campaigns identify users most likely to convert.
 from typing import Any, List, Optional
 
 from fastmcp import FastMCP
-from google.ads.googleads.v20.services.services.asset_group_signal_service import (
+from google.ads.googleads.v26.services.services.asset_group_signal_service import (
     AssetGroupSignalServiceClient,
 )
-from google.ads.googleads.v20.services.types.asset_group_signal_service import (
+from google.ads.googleads.v26.services.types.asset_group_signal_service import (
     AssetGroupSignalOperation,
     MutateAssetGroupSignalsRequest,
     MutateAssetGroupSignalsResponse,
 )
-from google.ads.googleads.v20.resources.types.asset_group_signal import AssetGroupSignal
-from google.ads.googleads.v20.enums.types.response_content_type import (
+from google.ads.googleads.v26.resources.types.asset_group_signal import AssetGroupSignal
+from google.ads.googleads.v26.enums.types.response_content_type import (
     ResponseContentTypeEnum,
 )
-from google.ads.googleads.v20.common.types.criteria import AudienceInfo, SearchThemeInfo
-from google.ads.googleads.v20.common.types.policy import PolicyViolationKey
+from google.ads.googleads.v26.common.types.criteria import AudienceInfo, SearchThemeInfo
+from google.ads.googleads.v26.common.types.policy import PolicyViolationKey
 
 from src.utils import resolve_enum
 from src.sdk_client import get_sdk_client
@@ -44,9 +44,7 @@ class AssetGroupSignalService:
         """Get the asset group signal service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "AssetGroupSignalService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("AssetGroupSignalService")
         assert self._client is not None
         return self._client
 

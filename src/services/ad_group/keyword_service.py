@@ -4,20 +4,20 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types.criteria import KeywordInfo
-from google.ads.googleads.v20.enums.types.ad_group_criterion_status import (
+from google.ads.googleads.v26.common.types.criteria import KeywordInfo
+from google.ads.googleads.v26.enums.types.ad_group_criterion_status import (
     AdGroupCriterionStatusEnum,
 )
-from google.ads.googleads.v20.enums.types.keyword_match_type import (
+from google.ads.googleads.v26.enums.types.keyword_match_type import (
     KeywordMatchTypeEnum,
 )
-from google.ads.googleads.v20.resources.types.ad_group_criterion import (
+from google.ads.googleads.v26.resources.types.ad_group_criterion import (
     AdGroupCriterion,
 )
-from google.ads.googleads.v20.services.services.ad_group_criterion_service import (
+from google.ads.googleads.v26.services.services.ad_group_criterion_service import (
     AdGroupCriterionServiceClient,
 )
-from google.ads.googleads.v20.services.types.ad_group_criterion_service import (
+from google.ads.googleads.v26.services.types.ad_group_criterion_service import (
     AdGroupCriterionOperation,
     MutateAdGroupCriteriaRequest,
     MutateAdGroupCriteriaResponse,
@@ -47,9 +47,7 @@ class KeywordService:
         """Get the ad group criterion service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "AdGroupCriterionService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("AdGroupCriterionService")
         assert self._client is not None
         return self._client
 

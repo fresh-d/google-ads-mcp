@@ -3,15 +3,15 @@
 from typing import Any, Dict, List, Optional, Callable, Awaitable
 
 from fastmcp import Context, FastMCP
-from google.ads.googleads.v20.services.services.user_data_service import (
+from google.ads.googleads.v26.services.services.user_data_service import (
     UserDataServiceClient,
 )
-from google.ads.googleads.v20.services.types.user_data_service import (
+from google.ads.googleads.v26.services.types.user_data_service import (
     UploadUserDataRequest,
     UploadUserDataResponse,
     UserDataOperation,
 )
-from google.ads.googleads.v20.common.types.offline_user_data import (
+from google.ads.googleads.v26.common.types.offline_user_data import (
     UserData,
     UserIdentifier,
     TransactionAttribute,
@@ -21,7 +21,7 @@ from google.ads.googleads.v20.common.types.offline_user_data import (
     CustomerMatchUserListMetadata,
     OfflineUserAddressInfo,
 )
-from google.ads.googleads.v20.enums.types.user_identifier_source import (
+from google.ads.googleads.v26.enums.types.user_identifier_source import (
     UserIdentifierSourceEnum,
 )
 from google.ads.googleads.errors import GoogleAdsException
@@ -44,9 +44,7 @@ class UserDataService:
         """Get the user data service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "UserDataService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("UserDataService")
         assert self._client is not None
         return self._client
 
@@ -396,7 +394,7 @@ class UserDataService:
             request.customer_id = customer_id
             request.operations = operations
 
-            # Note: StoreSalesMetadata is not supported as a separate field in v20 API
+            # Note: StoreSalesMetadata is not supported as a separate field in v26 API
             # Store sales data is handled through transaction attributes with store_code
 
             # Make the API call

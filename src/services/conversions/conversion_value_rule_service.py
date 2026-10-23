@@ -4,12 +4,12 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 
-# Note: Value rule types may not be available in v20 - using simplified implementation
+# Note: Value rule types may not be available in v26 - using simplified implementation
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.services.services.conversion_value_rule_service import (
+from google.ads.googleads.v26.services.services.conversion_value_rule_service import (
     ConversionValueRuleServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
 
@@ -31,9 +31,7 @@ class ConversionValueRuleService:
         """Get the conversion value rule service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "ConversionValueRuleService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("ConversionValueRuleService")
         assert self._client is not None
         return self._client
 
@@ -44,7 +42,7 @@ class ConversionValueRuleService:
         conversion_value_rule_set_id: str,
         status: str = "ENABLED",
     ) -> Dict[str, Any]:
-        """Create a basic conversion value rule (simplified due to v20 limitations).
+        """Create a basic conversion value rule (simplified due to v26 limitations).
 
         Args:
             ctx: FastMCP context
@@ -58,7 +56,7 @@ class ConversionValueRuleService:
         try:
             customer_id = format_customer_id(customer_id)
 
-            # Note: Value rule types not available in v20 - simplified implementation
+            # Note: Value rule types not available in v26 - simplified implementation
             await ctx.log(
                 level="info",
                 message=f"Conversion value rule creation requested for rule set {conversion_value_rule_set_id}",
@@ -68,8 +66,8 @@ class ConversionValueRuleService:
                 "customer_id": customer_id,
                 "conversion_value_rule_set_id": conversion_value_rule_set_id,
                 "status": status,
-                "result": "Request processed - conversion value rule creation requires additional v20 type support",
-                "note": "This is a simplified implementation due to v20 API limitations",
+                "result": "Request processed - conversion value rule creation requires additional v26 type support",
+                "note": "This is a simplified implementation due to v26 API limitations",
             }
 
         except GoogleAdsException as e:
@@ -88,7 +86,7 @@ class ConversionValueRuleService:
         rule_resource_name: str,
         status: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update a conversion value rule (simplified due to v20 limitations).
+        """Update a conversion value rule (simplified due to v26 limitations).
 
         Args:
             ctx: FastMCP context
@@ -110,8 +108,8 @@ class ConversionValueRuleService:
             return {
                 "resource_name": rule_resource_name,
                 "status": status,
-                "result": "Request processed - conversion value rule updates require additional v20 type support",
-                "note": "This is a simplified implementation due to v20 API limitations",
+                "result": "Request processed - conversion value rule updates require additional v26 type support",
+                "note": "This is a simplified implementation due to v26 API limitations",
             }
 
         except GoogleAdsException as e:
@@ -253,7 +251,7 @@ def create_conversion_value_rule_tools(
         conversion_value_rule_set_id: str,
         status: str = "ENABLED",
     ) -> Dict[str, Any]:
-        """Create a basic conversion value rule (simplified due to v20 limitations).
+        """Create a basic conversion value rule (simplified due to v26 limitations).
 
         Args:
             customer_id: The customer ID
@@ -276,7 +274,7 @@ def create_conversion_value_rule_tools(
         rule_resource_name: str,
         status: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Update a conversion value rule (simplified due to v20 limitations).
+        """Update a conversion value rule (simplified due to v26 limitations).
 
         Args:
             customer_id: The customer ID

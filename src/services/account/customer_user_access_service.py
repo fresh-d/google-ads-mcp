@@ -4,17 +4,17 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.enums.types.access_role import AccessRoleEnum
-from google.ads.googleads.v20.resources.types.customer_user_access import (
+from google.ads.googleads.v26.enums.types.access_role import AccessRoleEnum
+from google.ads.googleads.v26.resources.types.customer_user_access import (
     CustomerUserAccess,
 )
-from google.ads.googleads.v20.services.services.customer_user_access_service import (
+from google.ads.googleads.v26.services.services.customer_user_access_service import (
     CustomerUserAccessServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.customer_user_access_service import (
+from google.ads.googleads.v26.services.types.customer_user_access_service import (
     CustomerUserAccessOperation,
     MutateCustomerUserAccessRequest,
 )
@@ -44,9 +44,7 @@ class CustomerUserAccessService:
         """Get the customer user access service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "CustomerUserAccessService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("CustomerUserAccessService")
         assert self._client is not None
         return self._client
 

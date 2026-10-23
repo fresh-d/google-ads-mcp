@@ -1,4 +1,4 @@
-"""Campaign Asset Set Service for Google Ads API v20.
+"""Campaign Asset Set Service for Google Ads API v26.
 
 This service manages asset set associations with campaigns, allowing asset sets
 to be linked to campaigns for use in advertising.
@@ -7,16 +7,16 @@ to be linked to campaigns for use in advertising.
 from typing import Any, List, Optional
 
 from fastmcp import FastMCP
-from google.ads.googleads.v20.services.services.campaign_asset_set_service import (
+from google.ads.googleads.v26.services.services.campaign_asset_set_service import (
     CampaignAssetSetServiceClient,
 )
-from google.ads.googleads.v20.services.types.campaign_asset_set_service import (
+from google.ads.googleads.v26.services.types.campaign_asset_set_service import (
     CampaignAssetSetOperation,
     MutateCampaignAssetSetsRequest,
     MutateCampaignAssetSetsResponse,
 )
-from google.ads.googleads.v20.resources.types.campaign_asset_set import CampaignAssetSet
-from google.ads.googleads.v20.enums.types.response_content_type import (
+from google.ads.googleads.v26.resources.types.campaign_asset_set import CampaignAssetSet
+from google.ads.googleads.v26.enums.types.response_content_type import (
     ResponseContentTypeEnum,
 )
 
@@ -40,9 +40,7 @@ class CampaignAssetSetService:
         """Get the campaign asset set service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "CampaignAssetSetService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("CampaignAssetSetService")
         assert self._client is not None
         return self._client
 

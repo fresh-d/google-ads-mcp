@@ -5,20 +5,20 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastmcp import Context
-from google.ads.googleads.v20.enums.types.advertising_channel_type import (
+from google.ads.googleads.v26.enums.types.advertising_channel_type import (
     AdvertisingChannelTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.campaign_experiment_type import (
+from google.ads.googleads.v26.enums.types.campaign_experiment_type import (
     CampaignExperimentTypeEnum,
 )
-from google.ads.googleads.v20.enums.types.campaign_status import CampaignStatusEnum
-from google.ads.googleads.v20.enums.types.eu_political_advertising_status import (
+from google.ads.googleads.v26.enums.types.campaign_status import CampaignStatusEnum
+from google.ads.googleads.v26.enums.types.eu_political_advertising_status import (
     EuPoliticalAdvertisingStatusEnum,
 )
-from google.ads.googleads.v20.services.services.campaign_service import (
+from google.ads.googleads.v26.services.services.campaign_service import (
     CampaignServiceClient,
 )
-from google.ads.googleads.v20.services.types.campaign_service import (
+from google.ads.googleads.v26.services.types.campaign_service import (
     MutateCampaignsResponse,
 )
 
@@ -51,7 +51,7 @@ def _mock_mutate(campaign_service: CampaignService) -> tuple[Mock, dict[str, Any
     mock_result.resource_name = "customers/1234567890/campaigns/111222333"
     mock_response.results = [mock_result]
 
-    mock_client = campaign_service.client  # type: ignore
+    mock_client: Mock = campaign_service.client  # type: ignore
     mock_client.mutate_campaigns.return_value = mock_response  # type: ignore
 
     expected = {
@@ -139,8 +139,8 @@ async def test_create_campaign_with_dates(
     assert result == expected
     request = mock_client.mutate_campaigns.call_args[1]["request"]  # type: ignore
     op = request.operations[0]
-    assert op.create.start_date == "20240301"
-    assert op.create.end_date == "20240331"
+    assert op.create.start_date_time == "2024-03-01 00:00:00"
+    assert op.create.end_date_time == "2024-03-31 23:59:59"
 
 
 @pytest.mark.asyncio
@@ -369,9 +369,9 @@ async def test_update_campaign_dates_only(
     assert result == expected
     request = mock_client.mutate_campaigns.call_args[1]["request"]  # type: ignore
     op = request.operations[0]
-    assert op.update.start_date == "20240401"
-    assert op.update.end_date == "20240430"
-    assert set(op.update_mask.paths) == {"start_date", "end_date"}
+    assert op.update.start_date_time == "2024-04-01 00:00:00"
+    assert op.update.end_date_time == "2024-04-30 23:59:59"
+    assert set(op.update_mask.paths) == {"start_date_time", "end_date_time"}
 
 
 @pytest.mark.asyncio
@@ -412,7 +412,7 @@ async def test_error_handling_create_campaign(
     google_ads_exception: Any,
 ) -> None:
     """Test error handling when creating campaign fails."""
-    mock_client = campaign_service.client  # type: ignore
+    mock_client: Mock = campaign_service.client  # type: ignore
     mock_client.mutate_campaigns.side_effect = google_ads_exception  # type: ignore
 
     with pytest.raises(Exception) as exc_info:
@@ -435,7 +435,7 @@ async def test_error_handling_update_campaign(
     google_ads_exception: Any,
 ) -> None:
     """Test error handling when updating campaign fails."""
-    mock_client = campaign_service.client  # type: ignore
+    mock_client: Mock = campaign_service.client  # type: ignore
     mock_client.mutate_campaigns.side_effect = google_ads_exception  # type: ignore
 
     with pytest.raises(Exception) as exc_info:

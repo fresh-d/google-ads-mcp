@@ -4,26 +4,26 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastmcp import Context, FastMCP
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.v20.common.types.criteria import (
+from google.ads.googleads.v26.common.types.criteria import (
     DeviceInfo,
-    HotelCheckInDayInfo,
-    HotelDateSelectionTypeInfo,
+    StartDayOfWeekInfo,
+    UserSetDatesInfo,
 )
-from google.ads.googleads.v20.enums.types.day_of_week import DayOfWeekEnum
-from google.ads.googleads.v20.enums.types.device import DeviceEnum
-from google.ads.googleads.v20.enums.types.hotel_date_selection_type import (
-    HotelDateSelectionTypeEnum,
+from google.ads.googleads.v26.enums.types.day_of_week import DayOfWeekEnum
+from google.ads.googleads.v26.enums.types.device import DeviceEnum
+from google.ads.googleads.v26.enums.types.date_selection_type import (
+    DateSelectionTypeEnum,
 )
-from google.ads.googleads.v20.resources.types.ad_group_bid_modifier import (
+from google.ads.googleads.v26.resources.types.ad_group_bid_modifier import (
     AdGroupBidModifier,
 )
-from google.ads.googleads.v20.services.services.ad_group_bid_modifier_service import (
+from google.ads.googleads.v26.services.services.ad_group_bid_modifier_service import (
     AdGroupBidModifierServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.ad_group_bid_modifier_service import (
+from google.ads.googleads.v26.services.types.ad_group_bid_modifier_service import (
     AdGroupBidModifierOperation,
     MutateAdGroupBidModifiersRequest,
     MutateAdGroupBidModifiersResponse,
@@ -54,9 +54,7 @@ class AdGroupBidModifierService:
         """Get the ad group bid modifier service client."""
         if self._client is None:
             sdk_client = get_sdk_client()
-            self._client = sdk_client.client.get_service(
-                "AdGroupBidModifierService", version="v20"
-            )
+            self._client = sdk_client.client.get_service("AdGroupBidModifierService")
         assert self._client is not None
         return self._client
 
@@ -156,11 +154,11 @@ class AdGroupBidModifierService:
             bid_modifier_obj.bid_modifier = bid_modifier
 
             # Set hotel check-in day criterion
-            hotel_check_in_day = HotelCheckInDayInfo()
-            hotel_check_in_day.day_of_week = resolve_enum(
+            start_day_of_week = StartDayOfWeekInfo()
+            start_day_of_week.day_of_week = resolve_enum(
                 DayOfWeekEnum.DayOfWeek, day_of_week, "day_of_week"
             )
-            bid_modifier_obj.hotel_check_in_day = hotel_check_in_day
+            bid_modifier_obj.start_day_of_week = start_day_of_week
 
             # Create operation
             operation = AdGroupBidModifierOperation()
@@ -222,13 +220,13 @@ class AdGroupBidModifierService:
             bid_modifier_obj.bid_modifier = bid_modifier
 
             # Set hotel date selection type criterion
-            hotel_date_selection = HotelDateSelectionTypeInfo()
-            hotel_date_selection.type_ = resolve_enum(
-                HotelDateSelectionTypeEnum.HotelDateSelectionType,
+            user_set_dates = UserSetDatesInfo()
+            user_set_dates.type_ = resolve_enum(
+                DateSelectionTypeEnum.DateSelectionType,
                 date_selection_type,
                 "date_selection_type",
             )
-            bid_modifier_obj.hotel_date_selection_type = hotel_date_selection
+            bid_modifier_obj.user_set_dates = user_set_dates
 
             # Create operation
             operation = AdGroupBidModifierOperation()
@@ -351,14 +349,14 @@ class AdGroupBidModifierService:
                     ad_group_bid_modifier.ad_group,
                     ad_group_bid_modifier.bid_modifier,
                     ad_group_bid_modifier.device.type,
-                    ad_group_bid_modifier.hotel_date_selection_type.type,
-                    ad_group_bid_modifier.hotel_advance_booking_window.min_days,
-                    ad_group_bid_modifier.hotel_advance_booking_window.max_days,
-                    ad_group_bid_modifier.hotel_length_of_stay.min_nights,
-                    ad_group_bid_modifier.hotel_length_of_stay.max_nights,
-                    ad_group_bid_modifier.hotel_check_in_day.day_of_week,
-                    ad_group_bid_modifier.hotel_check_in_date_range.start_date,
-                    ad_group_bid_modifier.hotel_check_in_date_range.end_date,
+                    ad_group_bid_modifier.user_set_dates.type,
+                    ad_group_bid_modifier.advance_booking_window.min_days,
+                    ad_group_bid_modifier.advance_booking_window.max_days,
+                    ad_group_bid_modifier.length_of_booking.min_days,
+                    ad_group_bid_modifier.length_of_booking.max_days,
+                    ad_group_bid_modifier.start_day_of_week.day_of_week,
+                    ad_group_bid_modifier.start_date_range.start_date,
+                    ad_group_bid_modifier.start_date_range.end_date,
                     ad_group.id,
                     ad_group.name,
                     campaign.id,
@@ -404,33 +402,33 @@ class AdGroupBidModifierService:
                     modifier_dict["criterion_details"] = {
                         "device_type": bid_modifier.device.type.name
                     }
-                elif bid_modifier.hotel_date_selection_type.type:
-                    modifier_dict["criterion_type"] = "HOTEL_DATE_SELECTION"
+                elif bid_modifier.user_set_dates.type:
+                    modifier_dict["criterion_type"] = "USER_SET_DATES"
                     modifier_dict["criterion_details"] = {
-                        "type": bid_modifier.hotel_date_selection_type.type.name
+                        "type": bid_modifier.user_set_dates.type.name
                     }
-                elif bid_modifier.hotel_advance_booking_window:
-                    modifier_dict["criterion_type"] = "HOTEL_ADVANCE_BOOKING_WINDOW"
+                elif bid_modifier.advance_booking_window:
+                    modifier_dict["criterion_type"] = "ADVANCE_BOOKING_WINDOW"
                     modifier_dict["criterion_details"] = {
-                        "min_days": bid_modifier.hotel_advance_booking_window.min_days,
-                        "max_days": bid_modifier.hotel_advance_booking_window.max_days,
+                        "min_days": bid_modifier.advance_booking_window.min_days,
+                        "max_days": bid_modifier.advance_booking_window.max_days,
                     }
-                elif bid_modifier.hotel_length_of_stay:
-                    modifier_dict["criterion_type"] = "HOTEL_LENGTH_OF_STAY"
+                elif bid_modifier.length_of_booking:
+                    modifier_dict["criterion_type"] = "LENGTH_OF_BOOKING"
                     modifier_dict["criterion_details"] = {
-                        "min_nights": bid_modifier.hotel_length_of_stay.min_nights,
-                        "max_nights": bid_modifier.hotel_length_of_stay.max_nights,
+                        "min_days": bid_modifier.length_of_booking.min_days,
+                        "max_days": bid_modifier.length_of_booking.max_days,
                     }
-                elif bid_modifier.hotel_check_in_day.day_of_week:
-                    modifier_dict["criterion_type"] = "HOTEL_CHECK_IN_DAY"
+                elif bid_modifier.start_day_of_week.day_of_week:
+                    modifier_dict["criterion_type"] = "START_DAY_OF_WEEK"
                     modifier_dict["criterion_details"] = {
-                        "day_of_week": bid_modifier.hotel_check_in_day.day_of_week.name
+                        "day_of_week": bid_modifier.start_day_of_week.day_of_week.name
                     }
-                elif bid_modifier.hotel_check_in_date_range.start_date:
-                    modifier_dict["criterion_type"] = "HOTEL_CHECK_IN_DATE_RANGE"
+                elif bid_modifier.start_date_range.start_date:
+                    modifier_dict["criterion_type"] = "START_DATE_RANGE"
                     modifier_dict["criterion_details"] = {
-                        "start_date": bid_modifier.hotel_check_in_date_range.start_date,
-                        "end_date": bid_modifier.hotel_check_in_date_range.end_date,
+                        "start_date": bid_modifier.start_date_range.start_date,
+                        "end_date": bid_modifier.start_date_range.end_date,
                     }
 
                 bid_modifiers.append(modifier_dict)

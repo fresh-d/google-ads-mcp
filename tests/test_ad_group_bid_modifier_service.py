@@ -5,18 +5,18 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastmcp import Context
-from google.ads.googleads.v20.enums.types.day_of_week import DayOfWeekEnum
-from google.ads.googleads.v20.enums.types.device import DeviceEnum
-from google.ads.googleads.v20.enums.types.hotel_date_selection_type import (
-    HotelDateSelectionTypeEnum,
+from google.ads.googleads.v26.enums.types.day_of_week import DayOfWeekEnum
+from google.ads.googleads.v26.enums.types.device import DeviceEnum
+from google.ads.googleads.v26.enums.types.date_selection_type import (
+    DateSelectionTypeEnum,
 )
-from google.ads.googleads.v20.services.services.ad_group_bid_modifier_service import (
+from google.ads.googleads.v26.services.services.ad_group_bid_modifier_service import (
     AdGroupBidModifierServiceClient,
 )
-from google.ads.googleads.v20.services.services.google_ads_service import (
+from google.ads.googleads.v26.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from google.ads.googleads.v20.services.types.ad_group_bid_modifier_service import (
+from google.ads.googleads.v26.services.types.ad_group_bid_modifier_service import (
     MutateAdGroupBidModifiersResponse,
 )
 
@@ -171,8 +171,7 @@ async def test_create_hotel_check_in_day_bid_modifier(
     )
     assert operation.create.bid_modifier == bid_modifier
     assert (
-        operation.create.hotel_check_in_day.day_of_week
-        == DayOfWeekEnum.DayOfWeek.MONDAY
+        operation.create.start_day_of_week.day_of_week == DayOfWeekEnum.DayOfWeek.MONDAY
     )
 
     # Verify logging
@@ -241,8 +240,8 @@ async def test_create_hotel_date_selection_bid_modifier(
     )
     assert operation.create.bid_modifier == bid_modifier
     assert (
-        operation.create.hotel_date_selection_type.type_
-        == HotelDateSelectionTypeEnum.HotelDateSelectionType.DEFAULT_SELECTION
+        operation.create.user_set_dates.type_
+        == DateSelectionTypeEnum.DateSelectionType.DEFAULT_SELECTION
     )
 
     # Verify logging
@@ -338,11 +337,11 @@ async def test_list_ad_group_bid_modifiers(
     row1.ad_group_bid_modifier.device = Mock()
     row1.ad_group_bid_modifier.device.type = DeviceEnum.Device.MOBILE
     # Initialize other criterion types to None
-    row1.ad_group_bid_modifier.hotel_date_selection_type = Mock(type=None)
-    row1.ad_group_bid_modifier.hotel_advance_booking_window = Mock(min_days=None)
-    row1.ad_group_bid_modifier.hotel_length_of_stay = Mock(min_nights=None)
-    row1.ad_group_bid_modifier.hotel_check_in_day = Mock(day_of_week=None)
-    row1.ad_group_bid_modifier.hotel_check_in_date_range = Mock(start_date=None)
+    row1.ad_group_bid_modifier.user_set_dates = Mock(type=None)
+    row1.ad_group_bid_modifier.advance_booking_window = Mock(min_days=None)
+    row1.ad_group_bid_modifier.length_of_booking = Mock(min_days=None)
+    row1.ad_group_bid_modifier.start_day_of_week = Mock(day_of_week=None)
+    row1.ad_group_bid_modifier.start_date_range = Mock(start_date=None)
     row1.ad_group = Mock(id="111", name="Test Ad Group")
     row1.campaign = Mock(id="222", name="Test Campaign")
     mock_results.append(row1)
@@ -354,16 +353,16 @@ async def test_list_ad_group_bid_modifiers(
         f"customers/{customer_id}/adGroupBidModifiers/67890"
     )
     row2.ad_group_bid_modifier.bid_modifier = 1.5
-    row2.ad_group_bid_modifier.hotel_check_in_day = Mock()
-    row2.ad_group_bid_modifier.hotel_check_in_day.day_of_week = (
+    row2.ad_group_bid_modifier.start_day_of_week = Mock()
+    row2.ad_group_bid_modifier.start_day_of_week.day_of_week = (
         DayOfWeekEnum.DayOfWeek.MONDAY
     )
     # Initialize other criterion types to None
     row2.ad_group_bid_modifier.device = Mock(type=None)
-    row2.ad_group_bid_modifier.hotel_date_selection_type = Mock(type=None)
-    row2.ad_group_bid_modifier.hotel_advance_booking_window = None
-    row2.ad_group_bid_modifier.hotel_length_of_stay = None
-    row2.ad_group_bid_modifier.hotel_check_in_date_range = Mock(start_date=None)
+    row2.ad_group_bid_modifier.user_set_dates = Mock(type=None)
+    row2.ad_group_bid_modifier.advance_booking_window = None
+    row2.ad_group_bid_modifier.length_of_booking = None
+    row2.ad_group_bid_modifier.start_date_range = Mock(start_date=None)
     row2.ad_group = Mock(id="111", name="Test Ad Group")
     row2.campaign = Mock(id="222", name="Test Campaign")
     mock_results.append(row2)
@@ -400,7 +399,7 @@ async def test_list_ad_group_bid_modifiers(
 
     # Check hotel check-in day bid modifier
     assert result[1]["bid_modifier"] == 1.5
-    assert result[1]["criterion_type"] == "HOTEL_CHECK_IN_DAY"
+    assert result[1]["criterion_type"] == "START_DAY_OF_WEEK"
     assert result[1]["criterion_details"]["day_of_week"] == "MONDAY"
 
     # Verify the search call
