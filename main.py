@@ -202,8 +202,8 @@ Examples:
     parser.add_argument(
         "--groups",
         type=str,
-        default="core",
-        help="Comma-separated list of server groups to mount (default: core)",
+        default="all",
+        help="Comma-separated list of server groups to mount (default: all)",
     )
 
     return parser.parse_args()
